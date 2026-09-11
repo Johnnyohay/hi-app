@@ -2,9 +2,8 @@ import { Tabs, TabList, TabTrigger, TabSlot, TabTriggerSlotProps, TabListProps }
 import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
 
 import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
 
-import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
+import { Colors, ContentMaxWidth, Spacing } from '@/constants/theme';
 
 export default function AppTabs() {
   return (
@@ -25,13 +24,20 @@ export default function AppTabs() {
 }
 
 export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps) {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
+
   return (
-    <Pressable {...props} style={({ pressed }) => pressed && styles.pressed}>
-      <ThemedView type={isFocused ? 'surface' : 'background'} style={styles.tabButtonView}>
-        <ThemedText type="label" themeColor={isFocused ? 'ink' : 'inkMuted'}>
-          {children}
-        </ThemedText>
-      </ThemedView>
+    <Pressable {...props} style={({ pressed }) => [styles.tabButtonView, pressed && styles.pressed]}>
+      <ThemedText type="label" themeColor={isFocused ? 'ink' : 'inkMuted'}>
+        {children}
+      </ThemedText>
+      <View
+        style={[
+          styles.tabIndicator,
+          { backgroundColor: isFocused ? colors.accent : 'transparent' },
+        ]}
+      />
     </Pressable>
   );
 }
@@ -41,48 +47,54 @@ export function CustomTabList(props: TabListProps) {
   const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
 
   return (
-    <View {...props} style={styles.tabListContainer}>
-      <ThemedView
-        type="surface"
-        style={[styles.innerContainer, { borderColor: colors.hairline }]}>
+    <View
+      {...props}
+      style={[
+        styles.bar,
+        { backgroundColor: colors.background, borderBottomColor: colors.hairline },
+      ]}>
+      <View style={styles.innerContainer}>
         <ThemedText type="title" style={styles.brandText}>
           Hi
         </ThemedText>
 
-        {props.children}
-      </ThemedView>
+        <View style={styles.tabsRow}>{props.children}</View>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  tabListContainer: {
+  bar: {
     width: '100%',
-    padding: Spacing.lg,
-    justifyContent: 'center',
+    borderBottomWidth: 1,
     alignItems: 'center',
-    flexDirection: 'row',
   },
   innerContainer: {
-    paddingVertical: Spacing.sm,
+    width: '100%',
+    maxWidth: ContentMaxWidth,
     paddingHorizontal: Spacing.xl,
-    borderRadius: 4,
-    borderWidth: 1,
+    paddingVertical: Spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
-    flexGrow: 1,
-    gap: Spacing.lg,
-    maxWidth: MaxContentWidth,
+  },
+  tabsRow: {
+    flexDirection: 'row',
+    gap: Spacing.xl,
+    marginLeft: 'auto',
   },
   brandText: {
     marginRight: 'auto',
   },
   pressed: {
-    opacity: 0.7,
+    opacity: 0.6,
   },
   tabButtonView: {
     paddingVertical: Spacing.xs,
-    paddingHorizontal: Spacing.md,
-    borderRadius: 4,
+    gap: Spacing.xs,
+  },
+  tabIndicator: {
+    height: 2,
+    borderRadius: 1,
   },
 });

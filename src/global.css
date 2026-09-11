@@ -7,6 +7,20 @@ input:focus {
   outline: none;
 }
 
+html,
+body,
+#root {
+  background-color: #f6f1e7;
+}
+
+@media (prefers-color-scheme: dark) {
+  html,
+  body,
+  #root {
+    background-color: #17140f;
+  }
+}
+
 :root {
   --font-serif:
     'Fraunces', 'Source Serif 4', Georgia, 'Times New Roman', serif;

@@ -11,12 +11,46 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colorTokens } from '@/constants/tokens';
+import { useIsWideScreen } from '@/hooks/use-breakpoint';
+
+const COMPOSER_MAX_WIDTH = 640;
 
 export default function AskScreen() {
   const [need, setNeed] = useState('');
   const canSend = need.trim().length > 0;
   const scheme = useColorScheme();
   const placeholderColor = colorTokens[scheme === 'dark' ? 'dark' : 'light'].inkMuted;
+  const isWide = useIsWideScreen();
+
+  const field = (
+    <View className="w-full" style={{ maxWidth: COMPOSER_MAX_WIDTH }}>
+      <Text className="text-display font-serif-semibold text-ink dark:text-ink-dark">
+        What do you need?
+      </Text>
+
+      <TextInput
+        className="text-body font-sans text-ink dark:text-ink-dark mt-xl"
+        style={{ minHeight: 96, outlineWidth: 0 }}
+        value={need}
+        onChangeText={setNeed}
+        placeholder="I need someone who knows Series A fundraising in Bogotá."
+        placeholderTextColor={placeholderColor}
+        multiline
+        autoFocus
+      />
+
+      {isWide && (
+        <Pressable
+          disabled={!canSend}
+          className="rounded-sm px-2xl py-md items-center self-start mt-xl bg-accent dark:bg-accent-dark"
+          style={{ opacity: canSend ? 1 : 0.35, minHeight: 44 }}>
+          <Text className="text-label font-sans-medium text-background dark:text-background-dark">
+            Send
+          </Text>
+        </Pressable>
+      )}
+    </View>
+  );
 
   return (
     <SafeAreaView
@@ -25,33 +59,23 @@ export default function AskScreen() {
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View className="flex-1 px-lg pt-2xl">
-          <Text className="text-display font-serif-semibold text-ink dark:text-ink-dark">
-            What do you need?
-          </Text>
-
-          <TextInput
-            className="text-body font-sans text-ink dark:text-ink-dark mt-xl"
-            style={{ minHeight: 96, outlineWidth: 0 }}
-            value={need}
-            onChangeText={setNeed}
-            placeholder="I need someone who knows Series A fundraising in Bogotá."
-            placeholderTextColor={placeholderColor}
-            multiline
-            autoFocus
-          />
-        </View>
-
-        <View className="px-lg pb-lg">
-          <Pressable
-            disabled={!canSend}
-            className="rounded-sm py-md items-center bg-accent dark:bg-accent-dark"
-            style={{ opacity: canSend ? 1 : 0.35, minHeight: 44 }}>
-            <Text className="text-label font-sans-medium text-background dark:text-background-dark">
-              Send
-            </Text>
-          </Pressable>
-        </View>
+        {isWide ? (
+          <View className="flex-1 items-center justify-center px-lg">{field}</View>
+        ) : (
+          <>
+            <View className="flex-1 px-lg pt-2xl">{field}</View>
+            <View className="px-lg pb-lg">
+              <Pressable
+                disabled={!canSend}
+                className="rounded-sm py-md items-center bg-accent dark:bg-accent-dark"
+                style={{ opacity: canSend ? 1 : 0.35, minHeight: 44 }}>
+                <Text className="text-label font-sans-medium text-background dark:text-background-dark">
+                  Send
+                </Text>
+              </Pressable>
+            </View>
+          </>
+        )}
       </KeyboardAvoidingView>
     </SafeAreaView>
   );

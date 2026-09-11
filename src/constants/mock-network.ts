@@ -91,25 +91,31 @@ export type ThreadMessage = {
   sentAt: string;
 };
 
-export const sampleThread: {
-  person: NetworkPerson;
+export const sampleThread = {
+  person: networkPeople[0],
+};
+
+/** Sample thread content, generated for whichever person is selected. */
+export function getSampleMessages(person: NetworkPerson): {
   context: string;
   messages: ThreadMessage[];
-} = {
-  person: networkPeople[0],
-  context: 'You reached out about a career intro in banking, Peru.',
-  messages: [
-    {
-      id: '1',
-      from: 'me',
-      text: 'Hi Dana — a friend from the Lima cohort mentioned you might know people at Mibanco. I’m looking to move into retail banking there this year.',
-      sentAt: 'Mon 9:14 AM',
-    },
-    {
-      id: '2',
-      from: 'them',
-      text: 'Happy to help. I know two people on the hiring side there — let me make an intro this week.',
-      sentAt: 'Mon 11:40 AM',
-    },
-  ],
-};
+} {
+  const firstName = person.name.split(' ')[0];
+  return {
+    context: `You reached out about ${person.offerCategory.toLowerCase()}.`,
+    messages: [
+      {
+        id: '1',
+        from: 'me',
+        text: `Hi ${firstName} — a friend from the network mentioned you might be able to help with this. Do you have a few minutes this week?`,
+        sentAt: 'Mon 9:14 AM',
+      },
+      {
+        id: '2',
+        from: 'them',
+        text: 'Happy to help — let me get back to you on this shortly.',
+        sentAt: 'Mon 11:40 AM',
+      },
+    ],
+  };
+}
