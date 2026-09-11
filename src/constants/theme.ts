@@ -1,65 +1,36 @@
 /**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://reactnativeunistyles.vercel.app), etc.
+ * Native-side theme derived from the design tokens (src/constants/tokens.ts).
+ * NativeWind utility classes read the same tokens via tailwind.config.ts —
+ * this file exists for the color-scheme switching NativeWind's className
+ * strings can't express well (two full, unrelated palettes rather than a
+ * single hue shifted lighter/darker).
  */
-
 import '@/global.css';
 
 import { Platform } from 'react-native';
 
-export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
-  },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-  },
-} as const;
+import { colorTokens, spacingTokens, typeScale } from '@/constants/tokens';
+
+export const Colors = colorTokens;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
 
+export const TypeScale = typeScale;
+
 export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
+  web: {
+    serif: 'var(--font-serif)',
+    sans: 'var(--font-sans)',
+    mono: 'var(--font-mono)',
   },
   default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
+    serif: 'Fraunces_600SemiBold',
+    sans: 'Geist_400Regular',
+    mono: 'ui-monospace',
   },
 });
 
-export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
-} as const;
+export const Spacing = spacingTokens;
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;
