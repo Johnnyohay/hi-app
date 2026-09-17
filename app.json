@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "hi-app",
+    "name": "Hi",
     "slug": "hi-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,11 +8,14 @@
     "scheme": "hiapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "bundleIdentifier": "com.johnnyohay.hiapp",
+      "buildNumber": "1"
     },
     "android": {
+      "package": "com.johnnyohay.hiapp",
+      "versionCode": 1,
       "adaptiveIcon": {
-        "backgroundColor": "#F6F1E7",
+        "backgroundColor": "#221F1B",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
