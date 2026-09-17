@@ -35,7 +35,7 @@ export const Spacing = spacingTokens;
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 
 /** Width of the two-column list/detail shell on wide (web) screens. */
-export const ContentMaxWidth = 1120;
+export const ContentMaxWidth = 1240;
 
 /** Fixed width of the left list pane in a wide list/detail layout. */
-export const ListPaneWidth = 400;
+export const ListPaneWidth = 440;

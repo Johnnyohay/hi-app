@@ -1,0 +1,197 @@
+import { router } from 'expo-router';
+import { useState } from 'react';
+import { Pressable, ScrollView, Text, TextInput, View, useColorScheme } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { defaultSchool, isSchoolEmail } from '@/constants/schools';
+import { colorTokens } from '@/constants/tokens';
+import { isSupabaseConfigured } from '@/lib/supabase';
+import { oauthProviders, useAuth, type OAuthProviderId } from '@/lib/auth-context';
+
+const SIGN_IN_MAX_WIDTH = 480;
+
+type Mode = 'signin' | 'signup';
+
+export default function SignInScreen() {
+  const { authError, signInWithPassword, signUpWithPassword, signInWithProvider } = useAuth();
+  const [mode, setMode] = useState<Mode>('signin');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [status, setStatus] = useState<{ kind: 'idle' | 'sent' | 'error'; message?: string }>({
+    kind: 'idle',
+  });
+  const scheme = useColorScheme();
+  const placeholderColor = colorTokens[scheme === 'dark' ? 'dark' : 'light'].inkMuted;
+
+  async function handleSubmit() {
+    const trimmed = email.trim();
+    if (!trimmed || !password) return;
+
+    if (!isSchoolEmail(defaultSchool, trimmed)) {
+      setStatus({ kind: 'error', message: `Use your ${defaultSchool.name} email to sign in.` });
+      return;
+    }
+
+    const { error } =
+      mode === 'signin'
+        ? await signInWithPassword(trimmed, password)
+        : await signUpWithPassword(trimmed, password);
+
+    if (error) {
+      setStatus({ kind: 'error', message: error });
+    } else if (mode === 'signup') {
+      setStatus({ kind: 'sent', message: 'Check your inbox to confirm your account.' });
+    } else {
+      setStatus({ kind: 'idle' });
+    }
+  }
+
+  async function handleProvider(provider: OAuthProviderId) {
+    const { error } = await signInWithProvider(provider);
+    if (error) setStatus({ kind: 'error', message: error });
+  }
+
+  const canSubmit = email.trim().length > 0 && password.length > 0;
+
+  return (
+    <SafeAreaView
+      className="flex-1 bg-background dark:bg-background-dark"
+      edges={['top', 'left', 'right']}>
+      <ScrollView contentContainerClassName="items-center px-lg pt-4xl pb-4xl">
+        <View className="w-full" style={{ maxWidth: SIGN_IN_MAX_WIDTH }}>
+          <Text className="text-display font-serif-semibold text-ink dark:text-ink-dark">Hi</Text>
+          <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark mt-sm">
+            Hi keeps your real network alive — ask for help, reconnect with people you&apos;ve
+            lost touch with, and see who around you can lend a hand. Built for{' '}
+            {defaultSchool.name}.
+          </Text>
+
+          {!isSupabaseConfigured && (
+            <View className="mt-xl rounded-sm border border-hairline dark:border-hairline-dark bg-surface dark:bg-surface-dark px-lg py-lg">
+              <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
+                Backend isn&apos;t connected yet. This screen is real and will work as soon as
+                Supabase credentials are added to .env, and each provider below is enabled in the
+                Supabase dashboard.
+              </Text>
+            </View>
+          )}
+
+          {authError && (
+            <Text className="text-body font-sans text-accent dark:text-accent-dark mt-lg">
+              {authError}
+            </Text>
+          )}
+
+          <View className="gap-sm mt-xl">
+            {oauthProviders.map((provider) => (
+              <Pressable
+                key={provider.id}
+                onPress={() => handleProvider(provider.id)}
+                className="rounded-sm px-2xl py-md items-center border border-hairline dark:border-hairline-dark active:opacity-60"
+                style={{ minHeight: 44 }}>
+                <Text className="text-label font-sans-medium text-ink dark:text-ink-dark">
+                  Continue with {provider.label}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+
+          <View className="flex-row items-center gap-md mt-xl">
+            <View className="flex-1 h-px bg-hairline dark:bg-hairline-dark" />
+            <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">or</Text>
+            <View className="flex-1 h-px bg-hairline dark:bg-hairline-dark" />
+          </View>
+
+          <View className="flex-row gap-lg mt-xl">
+            <Pressable onPress={() => setMode('signin')} hitSlop={8}>
+              <Text
+                className={`text-label font-sans-medium ${
+                  mode === 'signin'
+                    ? 'text-ink dark:text-ink-dark'
+                    : 'text-ink-muted dark:text-ink-muted-dark'
+                }`}>
+                Sign in
+              </Text>
+            </Pressable>
+            <Pressable onPress={() => setMode('signup')} hitSlop={8}>
+              <Text
+                className={`text-label font-sans-medium ${
+                  mode === 'signup'
+                    ? 'text-ink dark:text-ink-dark'
+                    : 'text-ink-muted dark:text-ink-muted-dark'
+                }`}>
+                Create account
+              </Text>
+            </Pressable>
+          </View>
+
+          <TextInput
+            className="text-body font-sans text-ink dark:text-ink-dark mt-lg rounded-sm border border-hairline dark:border-hairline-dark px-lg"
+            style={{ minHeight: 48, outlineWidth: 0 }}
+            value={email}
+            onChangeText={(value) => {
+              setEmail(value);
+              setStatus({ kind: 'idle' });
+            }}
+            placeholder="you@hult.edu"
+            placeholderTextColor={placeholderColor}
+            autoCapitalize="none"
+            keyboardType="email-address"
+            returnKeyType="next"
+          />
+
+          <View className="flex-row items-center gap-sm mt-sm">
+            <TextInput
+              className="flex-1 text-body font-sans text-ink dark:text-ink-dark rounded-sm border border-hairline dark:border-hairline-dark px-lg"
+              style={{ minHeight: 48, outlineWidth: 0 }}
+              value={password}
+              onChangeText={(value) => {
+                setPassword(value);
+                setStatus({ kind: 'idle' });
+              }}
+              placeholder="Password"
+              placeholderTextColor={placeholderColor}
+              autoCapitalize="none"
+              secureTextEntry={!showPassword}
+              onSubmitEditing={handleSubmit}
+              returnKeyType="go"
+            />
+            <Pressable onPress={() => setShowPassword((value) => !value)} hitSlop={8}>
+              <Text className="text-label font-sans-medium text-ink-muted dark:text-ink-muted-dark">
+                {showPassword ? 'Hide' : 'Show'}
+              </Text>
+            </Pressable>
+          </View>
+
+          <Pressable
+            onPress={handleSubmit}
+            disabled={!canSubmit}
+            className="rounded-sm px-2xl py-md items-center self-start mt-lg bg-accent dark:bg-accent-dark"
+            style={{ opacity: canSubmit ? 1 : 0.35, minHeight: 44 }}>
+            <Text className="text-label font-sans-medium text-background dark:text-background-dark">
+              {mode === 'signin' ? 'Sign in' : 'Create account'}
+            </Text>
+          </Pressable>
+
+          {status.kind === 'sent' && (
+            <Text className="text-body font-sans text-ink dark:text-ink-dark mt-lg">
+              {status.message}
+            </Text>
+          )}
+          {status.kind === 'error' && (
+            <Text className="text-body font-sans text-accent dark:text-accent-dark mt-lg">
+              {status.message}
+            </Text>
+          )}
+
+          <Pressable onPress={() => router.replace('/(tabs)')} className="self-start mt-2xl" hitSlop={8}>
+            <Text className="text-label font-sans-medium text-ink-muted dark:text-ink-muted-dark">
+              Continue without an account →
+            </Text>
+          </Pressable>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}

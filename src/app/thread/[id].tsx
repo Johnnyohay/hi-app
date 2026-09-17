@@ -7,7 +7,7 @@ import { ThreadView } from '@/components/thread-view';
 import { networkPeople, sampleThread } from '@/constants/mock-network';
 
 export default function ThreadScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, prefill } = useLocalSearchParams<{ id: string; prefill?: string }>();
   const person = networkPeople.find((candidate) => candidate.id === id) ?? sampleThread.person;
 
   return (
@@ -18,7 +18,7 @@ export default function ThreadScreen() {
             <View className="flex-row items-center gap-sm">
               <Image
                 source={{ uri: person.photo }}
-                style={{ width: 28, height: 28, borderRadius: 4 }}
+                style={{ width: 32, height: 32, borderRadius: 4 }}
                 contentFit="cover"
               />
               <Text className="text-title font-serif-medium text-ink dark:text-ink-dark">
@@ -28,7 +28,7 @@ export default function ThreadScreen() {
           ),
         }}
       />
-      <ThreadView person={person} />
+      <ThreadView person={person} initialReply={prefill} />
     </SafeAreaView>
   );
 }
