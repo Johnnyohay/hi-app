@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -13,7 +13,8 @@ const SIGN_IN_MAX_WIDTH = 480;
 type Mode = 'signin' | 'signup';
 
 export default function SignInScreen() {
-  const { authError, signInWithPassword, signUpWithPassword, signInWithProvider } = useAuth();
+  const { session, authError, signInWithPassword, signUpWithPassword, signInWithProvider } =
+    useAuth();
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,6 +24,14 @@ export default function SignInScreen() {
   });
   const scheme = useColorScheme();
   const placeholderColor = colorTokens[scheme === 'dark' ? 'dark' : 'light'].inkMuted;
+
+  // Covers every path that can produce a session — password sign-in,
+  // auto-confirmed sign-up, and OAuth — without special-casing each one.
+  useEffect(() => {
+    if (session) {
+      router.replace('/(tabs)');
+    }
+  }, [session]);
 
   async function handleSubmit() {
     const trimmed = email.trim();
