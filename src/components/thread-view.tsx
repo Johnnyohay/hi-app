@@ -1,14 +1,9 @@
 import { Image } from 'expo-image';
-import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
-import {
-  getSampleMessages,
-  helpRequestMessage,
-  randomPlayfulNudge,
-  type NetworkPerson,
-  type ThreadMessage,
-} from '@/constants/mock-network';
+import { randomPlayfulNudge } from '@/constants/mock-network';
+import { fetchThread, helpRequestMessage, sendMessage, type Message, type Profile } from '@/lib/api';
 
 function QuickAction({ label, onPress }: { label: string; onPress: () => void }) {
   return (
@@ -24,22 +19,31 @@ function QuickAction({ label, onPress }: { label: string; onPress: () => void })
 
 export function ThreadView({
   person,
+  myUserId,
   showHeader = false,
   initialReply = '',
 }: {
-  person: NetworkPerson;
+  person: Profile;
+  myUserId: string;
   showHeader?: boolean;
   initialReply?: string;
 }) {
-  const { context, messages: initialMessages } = getSampleMessages(person);
-  const [messages, setMessages] = useState<ThreadMessage[]>(initialMessages);
+  const [messages, setMessages] = useState<Message[] | null>(null);
   const [reply, setReply] = useState(initialReply);
 
-  function appendMessage(text: string) {
-    setMessages((current) => [
-      ...current,
-      { id: `${current.length + 1}`, from: 'me', text, sentAt: 'Just now' },
-    ]);
+  useEffect(() => {
+    let cancelled = false;
+    fetchThread(myUserId, person.id).then((rows) => {
+      if (!cancelled) setMessages(rows);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [myUserId, person.id]);
+
+  async function appendMessage(text: string, kind: Message['kind'] = 'message') {
+    const sent = await sendMessage(myUserId, person.id, text, kind);
+    setMessages((current) => [...(current ?? []), sent]);
   }
 
   function sendReply() {
@@ -49,7 +53,7 @@ export function ThreadView({
   }
 
   function sendNudge() {
-    appendMessage(randomPlayfulNudge());
+    appendMessage(randomPlayfulNudge(), 'nudge');
   }
 
   function fillHelpRequest() {
@@ -61,7 +65,7 @@ export function ThreadView({
       {showHeader && (
         <View className="flex-row items-center gap-sm px-lg pt-lg pb-md">
           <Image
-            source={{ uri: person.photo }}
+            source={{ uri: person.photo_url ?? undefined }}
             style={{ width: 44, height: 44, borderRadius: 4 }}
             contentFit="cover"
           />
@@ -73,20 +77,36 @@ export function ThreadView({
 
       <View className="px-lg pt-md pb-lg border-b border-hairline dark:border-hairline-dark">
         <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
-          {context}
+          {person.offer_text}
         </Text>
       </View>
 
-      <ScrollView className="flex-1" contentContainerClassName="px-lg py-lg gap-lg">
-        {messages.map((message) => (
-          <View key={message.id} className="gap-xs">
-            <Text className="text-caption font-sans-medium text-ink-muted dark:text-ink-muted-dark uppercase">
-              {message.from === 'me' ? 'You' : person.name} · {message.sentAt}
+      {messages === null ? (
+        <View className="flex-1 items-center justify-center">
+          <ActivityIndicator />
+        </View>
+      ) : (
+        <ScrollView className="flex-1" contentContainerClassName="px-lg py-lg gap-lg">
+          {messages.length === 0 && (
+            <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
+              No messages yet — say hi.
             </Text>
-            <Text className="text-body font-sans text-ink dark:text-ink-dark">{message.text}</Text>
-          </View>
-        ))}
-      </ScrollView>
+          )}
+          {messages.map((message) => (
+            <View key={message.id} className="gap-xs">
+              <Text className="text-caption font-sans-medium text-ink-muted dark:text-ink-muted-dark uppercase">
+                {message.from_user_id === myUserId ? 'You' : person.name} ·{' '}
+                {new Date(message.created_at).toLocaleString(undefined, {
+                  weekday: 'short',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })}
+              </Text>
+              <Text className="text-body font-sans text-ink dark:text-ink-dark">{message.body}</Text>
+            </View>
+          ))}
+        </ScrollView>
+      )}
 
       <View className="flex-row gap-sm px-lg pb-sm">
         <QuickAction label="👋 Send a nudge" onPress={sendNudge} />

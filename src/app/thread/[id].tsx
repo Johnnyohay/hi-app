@@ -1,14 +1,46 @@
 import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThreadView } from '@/components/thread-view';
-import { networkPeople, sampleThread } from '@/constants/mock-network';
+import { useAuth } from '@/lib/auth-context';
+import { fetchMyProfile, type Profile } from '@/lib/api';
 
 export default function ThreadScreen() {
   const { id, prefill } = useLocalSearchParams<{ id: string; prefill?: string }>();
-  const person = networkPeople.find((candidate) => candidate.id === id) ?? sampleThread.person;
+  const { session } = useAuth();
+  const [person, setPerson] = useState<Profile | null>(null);
+
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    fetchMyProfile(id).then((row) => {
+      if (!cancelled) setPerson(row);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
+
+  if (!session) {
+    return (
+      <SafeAreaView className="flex-1 bg-background dark:bg-background-dark items-center justify-center px-lg">
+        <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
+          Sign in to view this thread.
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (!person) {
+    return (
+      <SafeAreaView className="flex-1 bg-background dark:bg-background-dark items-center justify-center">
+        <ActivityIndicator />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={['left', 'right']}>
@@ -17,7 +49,7 @@ export default function ThreadScreen() {
           headerTitle: () => (
             <View className="flex-row items-center gap-sm">
               <Image
-                source={{ uri: person.photo }}
+                source={{ uri: person.photo_url ?? undefined }}
                 style={{ width: 32, height: 32, borderRadius: 4 }}
                 contentFit="cover"
               />
@@ -28,7 +60,7 @@ export default function ThreadScreen() {
           ),
         }}
       />
-      <ThreadView person={person} initialReply={prefill} />
+      <ThreadView person={person} myUserId={session.user.id} initialReply={prefill} />
     </SafeAreaView>
   );
 }

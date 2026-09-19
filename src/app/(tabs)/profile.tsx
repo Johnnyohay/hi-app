@@ -1,12 +1,23 @@
 import { Image } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
-import { useState } from 'react';
-import { Linking, Pressable, ScrollView, Text, TextInput, View, useColorScheme } from 'react-native';
+import { useEffect, useState } from 'react';
+import {
+  ActivityIndicator,
+  Linking,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+  useColorScheme,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { initialMe, socialPlatforms, socialUrl, type SocialPlatform } from '@/constants/me';
+import { socialPlatforms, socialUrl, type SocialPlatform } from '@/constants/me';
 import { colorTokens } from '@/constants/tokens';
+import { useAuth } from '@/lib/auth-context';
+import { fetchMyProfile, updateMyProfile, type Profile } from '@/lib/api';
 
 const PROFILE_MAX_WIDTH = 800;
 
@@ -19,20 +30,33 @@ function SectionLabel({ children }: { children: string }) {
 }
 
 export default function ProfileScreen() {
-  const [me, setMe] = useState(initialMe);
+  const { session, signOut } = useAuth();
+  const [me, setMe] = useState<Profile | null>(null);
   const [editing, setEditing] = useState(false);
   const [newSkill, setNewSkill] = useState('');
+  const [saving, setSaving] = useState(false);
   const scheme = useColorScheme();
   const placeholderColor = colorTokens[scheme === 'dark' ? 'dark' : 'light'].inkMuted;
 
+  useEffect(() => {
+    if (!session) return;
+    let cancelled = false;
+    fetchMyProfile(session.user.id).then((row) => {
+      if (!cancelled) setMe(row);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [session]);
+
   function removeSkill(skill: string) {
-    setMe((current) => ({ ...current, skills: current.skills.filter((entry) => entry !== skill) }));
+    setMe((current) => current && { ...current, skills: current.skills.filter((entry) => entry !== skill) });
   }
 
   function addSkill() {
     const trimmed = newSkill.trim();
-    if (!trimmed || me.skills.includes(trimmed)) return;
-    setMe((current) => ({ ...current, skills: [...current.skills, trimmed] }));
+    if (!trimmed || !me || me.skills.includes(trimmed)) return;
+    setMe((current) => current && { ...current, skills: [...current.skills, trimmed] });
     setNewSkill('');
   }
 
@@ -48,11 +72,54 @@ export default function ProfileScreen() {
     });
     if (result.canceled) return;
 
-    setMe((current) => ({ ...current, photo: result.assets[0].uri }));
+    setMe((current) => current && { ...current, photo_url: result.assets[0].uri });
   }
 
   function updateSocial(platform: SocialPlatform, handle: string) {
-    setMe((current) => ({ ...current, socialLinks: { ...current.socialLinks, [platform]: handle } }));
+    setMe((current) => current && { ...current, social_links: { ...current.social_links, [platform]: handle } });
+  }
+
+  async function toggleEditing() {
+    if (editing && me && session) {
+      setSaving(true);
+      try {
+        const saved = await updateMyProfile(session.user.id, {
+          name: me.name,
+          city: me.city,
+          bio: me.bio,
+          skills: me.skills,
+          current_ask: me.current_ask,
+          social_links: me.social_links,
+          photo_url: me.photo_url,
+        });
+        setMe(saved);
+      } finally {
+        setSaving(false);
+      }
+    }
+    setEditing((value) => !value);
+  }
+
+  if (!session) {
+    return (
+      <SafeAreaView
+        className="flex-1 bg-background dark:bg-background-dark items-center justify-center px-lg"
+        edges={['top', 'left', 'right']}>
+        <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
+          Sign in to see your profile.
+        </Text>
+      </SafeAreaView>
+    );
+  }
+
+  if (!me) {
+    return (
+      <SafeAreaView
+        className="flex-1 bg-background dark:bg-background-dark items-center justify-center"
+        edges={['top', 'left', 'right']}>
+        <ActivityIndicator />
+      </SafeAreaView>
+    );
   }
 
   return (
@@ -65,7 +132,7 @@ export default function ProfileScreen() {
             <View className="flex-row gap-lg items-center flex-1">
               <Pressable onPress={editing ? pickPhoto : undefined} disabled={!editing}>
                 <Image
-                  source={{ uri: me.photo }}
+                  source={{ uri: me.photo_url ?? undefined }}
                   style={{ width: 104, height: 104, borderRadius: 4 }}
                   contentFit="cover"
                 />
@@ -83,26 +150,41 @@ export default function ProfileScreen() {
                     className="text-display font-serif-semibold text-ink dark:text-ink-dark"
                     style={{ outlineWidth: 0 }}
                     value={me.name}
-                    onChangeText={(name) => setMe((current) => ({ ...current, name }))}
+                    onChangeText={(name) => setMe((current) => current && { ...current, name })}
                   />
                 ) : (
                   <Text className="text-display font-serif-semibold text-ink dark:text-ink-dark">
-                    {me.name}
+                    {me.name || 'Add your name'}
                   </Text>
                 )}
                 <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
                   {me.role}
                 </Text>
-                <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
-                  {me.city}
-                </Text>
+                {editing ? (
+                  <TextInput
+                    className="text-caption font-sans text-ink dark:text-ink-dark"
+                    style={{ outlineWidth: 0 }}
+                    value={me.city}
+                    onChangeText={(city) => setMe((current) => current && { ...current, city })}
+                    placeholder="City"
+                    placeholderTextColor={placeholderColor}
+                  />
+                ) : (
+                  <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
+                    {me.city || 'Add your city'}
+                  </Text>
+                )}
               </View>
             </View>
 
-            <Pressable onPress={() => setEditing((value) => !value)} hitSlop={8}>
-              <Text className="text-label font-sans-medium text-accent dark:text-accent-dark">
-                {editing ? 'Done' : 'Edit'}
-              </Text>
+            <Pressable onPress={toggleEditing} hitSlop={8} disabled={saving}>
+              {saving ? (
+                <ActivityIndicator />
+              ) : (
+                <Text className="text-label font-sans-medium text-accent dark:text-accent-dark">
+                  {editing ? 'Done' : 'Edit'}
+                </Text>
+              )}
             </Pressable>
           </View>
 
@@ -113,12 +195,15 @@ export default function ProfileScreen() {
                 className="text-body font-sans text-ink dark:text-ink-dark mt-xs"
                 style={{ minHeight: 72, outlineWidth: 0 }}
                 value={me.bio}
-                onChangeText={(bio) => setMe((current) => ({ ...current, bio }))}
+                onChangeText={(bio) => setMe((current) => current && { ...current, bio })}
+                placeholder="A couple sentences about what you do."
                 placeholderTextColor={placeholderColor}
                 multiline
               />
             ) : (
-              <Text className="text-body font-sans text-ink dark:text-ink-dark mt-xs">{me.bio}</Text>
+              <Text className="text-body font-sans text-ink dark:text-ink-dark mt-xs">
+                {me.bio || 'Add a bio.'}
+              </Text>
             )}
           </View>
 
@@ -174,14 +259,15 @@ export default function ProfileScreen() {
                 <TextInput
                   className="text-body font-sans text-ink dark:text-ink-dark"
                   style={{ minHeight: 48, outlineWidth: 0 }}
-                  value={me.currentAsk}
-                  onChangeText={(currentAsk) => setMe((current) => ({ ...current, currentAsk }))}
+                  value={me.current_ask}
+                  onChangeText={(current_ask) => setMe((current) => current && { ...current, current_ask })}
+                  placeholder="What are you looking for right now?"
                   placeholderTextColor={placeholderColor}
                   multiline
                 />
               ) : (
                 <Text className="text-body font-sans text-ink dark:text-ink-dark">
-                  {me.currentAsk}
+                  {me.current_ask || 'Add what you need.'}
                 </Text>
               )}
             </View>
@@ -191,7 +277,7 @@ export default function ProfileScreen() {
             <SectionLabel>Elsewhere</SectionLabel>
             <View className="gap-sm mt-xs">
               {socialPlatforms.map((platform) => {
-                const handle = me.socialLinks[platform.id] ?? '';
+                const handle = me.social_links[platform.id] ?? '';
                 const url = socialUrl(platform.id, handle);
                 return (
                   <View key={platform.id} className="flex-row items-center gap-md">
@@ -227,11 +313,18 @@ export default function ProfileScreen() {
             </View>
           </View>
 
-          <Pressable onPress={() => router.push('/sign-in')} className="self-start mt-2xl" hitSlop={8}>
-            <Text className="text-label font-sans-medium text-accent dark:text-accent-dark">
-              Account & sign-in →
-            </Text>
-          </Pressable>
+          <View className="flex-row gap-lg mt-2xl">
+            <Pressable onPress={() => router.push('/sign-in')} hitSlop={8}>
+              <Text className="text-label font-sans-medium text-accent dark:text-accent-dark">
+                Account & sign-in →
+              </Text>
+            </Pressable>
+            <Pressable onPress={() => signOut()} hitSlop={8}>
+              <Text className="text-label font-sans-medium text-ink-muted dark:text-ink-muted-dark">
+                Sign out
+              </Text>
+            </Pressable>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

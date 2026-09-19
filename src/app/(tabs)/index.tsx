@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -13,9 +14,11 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { PersonRow } from '@/components/person-row';
-import { askCategories, matchPeopleForAsk, type AskCategoryId } from '@/constants/mock-network';
+import { askCategories, type AskCategoryId } from '@/constants/mock-network';
 import { colorTokens } from '@/constants/tokens';
 import { useIsWideScreen } from '@/hooks/use-breakpoint';
+import { useAuth } from '@/lib/auth-context';
+import { fetchNetwork, matchPeopleForAsk, postAsk, type Profile } from '@/lib/api';
 
 const COMPOSER_MAX_WIDTH = 800;
 
@@ -37,6 +40,8 @@ function CategoryChip({
 }
 
 export default function AskScreen() {
+  const { session } = useAuth();
+  const [network, setNetwork] = useState<Profile[] | null>(null);
   const [category, setCategory] = useState<AskCategoryId | null>(null);
   const [need, setNeed] = useState('');
   const [submitted, setSubmitted] = useState<{ need: string; category: AskCategoryId } | null>(null);
@@ -45,11 +50,23 @@ export default function AskScreen() {
   const placeholderColor = colorTokens[scheme === 'dark' ? 'dark' : 'light'].inkMuted;
   const isWide = useIsWideScreen();
 
+  useEffect(() => {
+    if (!session) return;
+    let cancelled = false;
+    fetchNetwork(session.user.id).then((people) => {
+      if (!cancelled) setNetwork(people);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [session]);
+
   const activeCategory = askCategories.find((entry) => entry.id === category);
-  const matches = submitted ? matchPeopleForAsk(submitted.need, submitted.category) : [];
+  const matches = submitted && network ? matchPeopleForAsk(network, submitted.need, submitted.category) : [];
 
   function handleSend() {
-    if (!canSend || !category) return;
+    if (!canSend || !category || !session) return;
+    postAsk(session.user.id, category, need.trim());
     setSubmitted({ need: need.trim(), category });
   }
 
@@ -60,6 +77,18 @@ export default function AskScreen() {
   function handleChangeCategory() {
     setCategory(null);
     setNeed('');
+  }
+
+  if (!session) {
+    return (
+      <SafeAreaView
+        className="flex-1 bg-background dark:bg-background-dark items-center justify-center px-lg"
+        edges={['top', 'left', 'right']}>
+        <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
+          Sign in to ask your network.
+        </Text>
+      </SafeAreaView>
+    );
   }
 
   if (submitted) {
@@ -171,13 +200,17 @@ export default function AskScreen() {
 
       {isWide && (
         <Pressable
-          disabled={!canSend}
+          disabled={!canSend || !network}
           onPress={handleSend}
           className="rounded-sm px-2xl py-md items-center self-start mt-xl bg-accent dark:bg-accent-dark"
-          style={{ opacity: canSend ? 1 : 0.35, minHeight: 44 }}>
-          <Text className="text-label font-sans-medium text-background dark:text-background-dark">
-            Send
-          </Text>
+          style={{ opacity: canSend && network ? 1 : 0.35, minHeight: 44 }}>
+          {network ? (
+            <Text className="text-label font-sans-medium text-background dark:text-background-dark">
+              Send
+            </Text>
+          ) : (
+            <ActivityIndicator />
+          )}
         </Pressable>
       )}
     </View>
@@ -197,10 +230,10 @@ export default function AskScreen() {
             <View className="flex-1 px-lg pt-2xl">{field}</View>
             <View className="px-lg pb-lg">
               <Pressable
-                disabled={!canSend}
+                disabled={!canSend || !network}
                 onPress={handleSend}
                 className="rounded-sm py-md items-center bg-accent dark:bg-accent-dark"
-                style={{ opacity: canSend ? 1 : 0.35, minHeight: 44 }}>
+                style={{ opacity: canSend && network ? 1 : 0.35, minHeight: 44 }}>
                 <Text className="text-label font-sans-medium text-background dark:text-background-dark">
                   Send
                 </Text>
