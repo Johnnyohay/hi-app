@@ -1,9 +1,9 @@
-import { Image } from 'expo-image';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Avatar } from '@/components/avatar';
 import { ThreadView } from '@/components/thread-view';
 import { useAuth } from '@/lib/auth-context';
 import { fetchMyProfile, type Profile } from '@/lib/api';
@@ -48,11 +48,7 @@ export default function ThreadScreen() {
         options={{
           headerTitle: () => (
             <View className="flex-row items-center gap-sm">
-              <Image
-                source={{ uri: person.photo_url ?? undefined }}
-                style={{ width: 32, height: 32, borderRadius: 4 }}
-                contentFit="cover"
-              />
+              <Avatar name={person.name} seed={person.id} size={32} />
               <Text className="text-title font-serif-medium text-ink dark:text-ink-dark">
                 {person.name}
               </Text>

@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, Text, TextInput, View, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { defaultSchool, isSchoolEmail } from '@/constants/schools';
 import { colorTokens } from '@/constants/tokens';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { oauthProviders, useAuth, type OAuthProviderId } from '@/lib/auth-context';
@@ -13,8 +12,7 @@ const SIGN_IN_MAX_WIDTH = 480;
 type Mode = 'signin' | 'signup';
 
 export default function SignInScreen() {
-  const { session, authError, signInWithPassword, signUpWithPassword, signInWithProvider } =
-    useAuth();
+  const { session, signInWithPassword, signUpWithPassword, signInWithProvider } = useAuth();
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,11 +34,6 @@ export default function SignInScreen() {
   async function handleSubmit() {
     const trimmed = email.trim();
     if (!trimmed || !password) return;
-
-    if (!isSchoolEmail(defaultSchool, trimmed)) {
-      setStatus({ kind: 'error', message: `Use your ${defaultSchool.name} email to sign in.` });
-      return;
-    }
 
     const { error } =
       mode === 'signin'
@@ -71,9 +64,7 @@ export default function SignInScreen() {
         <View className="w-full" style={{ maxWidth: SIGN_IN_MAX_WIDTH }}>
           <Text className="text-display font-serif-semibold text-ink dark:text-ink-dark">Hi</Text>
           <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark mt-sm">
-            Hi keeps your real network alive — ask for help, reconnect with people you&apos;ve
-            lost touch with, and see who around you can lend a hand. Built for{' '}
-            {defaultSchool.name}.
+            Ask people you actually know, directly. No feed, no broker, no anonymous accounts.
           </Text>
 
           {!isSupabaseConfigured && (
@@ -84,12 +75,6 @@ export default function SignInScreen() {
                 Supabase dashboard.
               </Text>
             </View>
-          )}
-
-          {authError && (
-            <Text className="text-body font-sans text-accent dark:text-accent-dark mt-lg">
-              {authError}
-            </Text>
           )}
 
           <View className="gap-sm mt-xl">
@@ -143,7 +128,7 @@ export default function SignInScreen() {
               setEmail(value);
               setStatus({ kind: 'idle' });
             }}
-            placeholder="you@hult.edu"
+            placeholder="you@email.com"
             placeholderTextColor={placeholderColor}
             autoCapitalize="none"
             keyboardType="email-address"
@@ -193,12 +178,6 @@ export default function SignInScreen() {
               {status.message}
             </Text>
           )}
-
-          <Pressable onPress={() => router.replace('/(tabs)')} className="self-start mt-2xl" hitSlop={8}>
-            <Text className="text-label font-sans-medium text-ink-muted dark:text-ink-muted-dark">
-              Continue without an account →
-            </Text>
-          </Pressable>
         </View>
       </ScrollView>
     </SafeAreaView>

@@ -1,37 +1,22 @@
 import { askCategories, type AskCategoryId } from '@/constants/mock-network';
+import type { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 
-export type Profile = {
-  id: string;
-  name: string;
-  role: string;
-  city: string;
-  lat: number | null;
-  lng: number | null;
-  photo_url: string | null;
-  bio: string;
-  offer_category: string | null;
-  offer_text: string;
-  skills: string[];
-  current_ask: string;
+type ProfileRow = Database['public']['Tables']['profiles']['Row'];
+type MessageRow = Database['public']['Tables']['messages']['Row'];
+
+export type Profile = Omit<ProfileRow, 'social_links'> & {
   social_links: Record<string, string>;
-  created_at: string;
-  updated_at: string;
 };
 
-export type Message = {
-  id: string;
-  from_user_id: string;
-  to_user_id: string;
-  body: string;
+export type Message = Omit<MessageRow, 'kind'> & {
   kind: 'message' | 'nudge' | 'help_request' | 'reconnect';
-  created_at: string;
 };
 
 export async function fetchMyProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
   if (error) throw error;
-  return data;
+  return data as Profile | null;
 }
 
 export async function updateMyProfile(userId: string, updates: Partial<Profile>): Promise<Profile> {
@@ -42,14 +27,14 @@ export async function updateMyProfile(userId: string, updates: Partial<Profile>)
     .select('*')
     .single();
   if (error) throw error;
-  return data;
+  return data as Profile;
 }
 
 /** Everyone else in the directory. */
 export async function fetchNetwork(excludeUserId: string): Promise<Profile[]> {
   const { data, error } = await supabase.from('profiles').select('*').neq('id', excludeUserId).order('name');
   if (error) throw error;
-  return data;
+  return data as Profile[];
 }
 
 export async function fetchThread(myUserId: string, otherUserId: string): Promise<Message[]> {
@@ -61,7 +46,7 @@ export async function fetchThread(myUserId: string, otherUserId: string): Promis
     )
     .order('created_at', { ascending: true });
   if (error) throw error;
-  return data;
+  return data as Message[];
 }
 
 export async function sendMessage(
@@ -76,7 +61,7 @@ export async function sendMessage(
     .select('*')
     .single();
   if (error) throw error;
-  return data;
+  return data as Message;
 }
 
 export async function postAsk(userId: string, category: AskCategoryId, needText: string) {
@@ -92,7 +77,7 @@ export async function fetchMyMessages(myUserId: string): Promise<Message[]> {
     .or(`from_user_id.eq.${myUserId},to_user_id.eq.${myUserId}`)
     .order('created_at', { ascending: false });
   if (error) throw error;
-  return data;
+  return data as Message[];
 }
 
 /** Last-contact timestamp per other-party user id, derived from a message list. */
@@ -117,7 +102,7 @@ export function formatLastContacted(days: number): string {
   return `${Math.round(days / 365)}y ago`;
 }
 
-/** The most overdue contact past the reconnect threshold, if any — only considers people with prior contact. */
+/** The most overdue contact past the reconnect threshold, if any, only considering people with prior contact. */
 export function getReconnectCandidate(
   network: Profile[],
   lastContact: Map<string, string>
@@ -135,11 +120,11 @@ export function getReconnectCandidate(
 }
 
 export function reconnectMessage(person: Profile): string {
-  return `Hey ${person.name.split(' ')[0]} — it's been a while. How are you?`;
+  return `Hey ${person.name.split(' ')[0]}, it's been a while. How are you?`;
 }
 
 export function helpRequestMessage(person: Profile): string {
-  return `Hi ${person.name.split(' ')[0]} — following up on what you offered (${person.offer_text.toLowerCase()}). Could you help with this?`;
+  return `Hi ${person.name.split(' ')[0]}, following up on what you offered (${person.offer_text.toLowerCase()}). Could you help with this?`;
 }
 
 const ASK_STOPWORDS = new Set([

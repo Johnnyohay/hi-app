@@ -1,7 +1,6 @@
 import type { Session } from '@supabase/supabase-js';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-import { defaultSchool, isSchoolEmail } from '@/constants/schools';
 import { oauthProviders, signInWithProvider as startOAuth, type OAuthProviderId } from '@/lib/oauth';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
@@ -11,7 +10,6 @@ export type { OAuthProviderId };
 type AuthContextValue = {
   session: Session | null;
   loading: boolean;
-  authError: string | null;
   signInWithPassword: (email: string, password: string) => Promise<{ error: string | null }>;
   signUpWithPassword: (email: string, password: string) => Promise<{ error: string | null }>;
   signInWithProvider: (provider: OAuthProviderId) => Promise<{ error: string | null }>;
@@ -23,32 +21,17 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(isSupabaseConfigured);
-  const [authError, setAuthError] = useState<string | null>(null);
-
-  // Runs on every sign-in, however it happened (magic link or any OAuth
-  // provider) — the one place that enforces "only this school's emails."
-  function applySession(nextSession: Session | null) {
-    const email = nextSession?.user.email;
-    if (nextSession && email && !isSchoolEmail(defaultSchool, email)) {
-      setAuthError(`Use your ${defaultSchool.name} email to sign in.`);
-      void supabase.auth.signOut();
-      setSession(null);
-      return;
-    }
-    setAuthError(null);
-    setSession(nextSession);
-  }
 
   useEffect(() => {
     if (!isSupabaseConfigured) return;
 
     supabase.auth.getSession().then(({ data }) => {
-      applySession(data.session);
+      setSession(data.session);
       setLoading(false);
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, nextSession) => {
-      applySession(nextSession);
+      setSession(nextSession);
     });
 
     return () => listener.subscription.unsubscribe();
@@ -56,10 +39,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signInWithPassword(email: string, password: string) {
     if (!isSupabaseConfigured) {
-      return { error: 'Backend not connected yet — see setup steps.' };
-    }
-    if (!isSchoolEmail(defaultSchool, email)) {
-      return { error: `Use your ${defaultSchool.name} email to sign in.` };
+      return { error: 'Backend not connected yet. See setup steps.' };
     }
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     return { error: error?.message ?? null };
@@ -67,10 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signUpWithPassword(email: string, password: string) {
     if (!isSupabaseConfigured) {
-      return { error: 'Backend not connected yet — see setup steps.' };
-    }
-    if (!isSchoolEmail(defaultSchool, email)) {
-      return { error: `Use your ${defaultSchool.name} email to sign in.` };
+      return { error: 'Backend not connected yet. See setup steps.' };
     }
     const { error } = await supabase.auth.signUp({ email, password });
     return { error: error?.message ?? null };
@@ -78,9 +55,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function signInWithProvider(provider: OAuthProviderId) {
     if (!isSupabaseConfigured) {
-      return { error: 'Backend not connected yet — see setup steps.' };
+      return { error: 'Backend not connected yet. See setup steps.' };
     }
-    return startOAuth(provider, { hostedDomain: defaultSchool.emailDomains[0] });
+    return startOAuth(provider);
   }
 
   async function signOut() {
@@ -93,7 +70,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         session,
         loading,
-        authError,
         signInWithPassword,
         signUpWithPassword,
         signInWithProvider,

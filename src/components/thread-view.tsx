@@ -1,7 +1,7 @@
-import { Image } from 'expo-image';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
+import { Avatar } from '@/components/avatar';
 import { randomPlayfulNudge } from '@/constants/mock-network';
 import { fetchThread, helpRequestMessage, sendMessage, type Message, type Profile } from '@/lib/api';
 
@@ -64,11 +64,7 @@ export function ThreadView({
     <KeyboardAvoidingView className="flex-1" behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       {showHeader && (
         <View className="flex-row items-center gap-sm px-lg pt-lg pb-md">
-          <Image
-            source={{ uri: person.photo_url ?? undefined }}
-            style={{ width: 44, height: 44, borderRadius: 4 }}
-            contentFit="cover"
-          />
+          <Avatar name={person.name} seed={person.id} size={44} />
           <Text className="text-title font-serif-medium text-ink dark:text-ink-dark">
             {person.name}
           </Text>

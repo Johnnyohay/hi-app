@@ -1,5 +1,3 @@
-import { Image } from 'expo-image';
-import * as ImagePicker from 'expo-image-picker';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -14,6 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Avatar } from '@/components/avatar';
 import { socialPlatforms, socialUrl, type SocialPlatform } from '@/constants/me';
 import { colorTokens } from '@/constants/tokens';
 import { useAuth } from '@/lib/auth-context';
@@ -60,21 +59,6 @@ export default function ProfileScreen() {
     setNewSkill('');
   }
 
-  async function pickPhoto() {
-    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (!permission.granted) return;
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.8,
-    });
-    if (result.canceled) return;
-
-    setMe((current) => current && { ...current, photo_url: result.assets[0].uri });
-  }
-
   function updateSocial(platform: SocialPlatform, handle: string) {
     setMe((current) => current && { ...current, social_links: { ...current.social_links, [platform]: handle } });
   }
@@ -90,7 +74,6 @@ export default function ProfileScreen() {
           skills: me.skills,
           current_ask: me.current_ask,
           social_links: me.social_links,
-          photo_url: me.photo_url,
         });
         setMe(saved);
       } finally {
@@ -130,20 +113,7 @@ export default function ProfileScreen() {
         <View className="w-full px-lg pt-2xl" style={{ maxWidth: PROFILE_MAX_WIDTH }}>
           <View className="flex-row items-start justify-between">
             <View className="flex-row gap-lg items-center flex-1">
-              <Pressable onPress={editing ? pickPhoto : undefined} disabled={!editing}>
-                <Image
-                  source={{ uri: me.photo_url ?? undefined }}
-                  style={{ width: 104, height: 104, borderRadius: 4 }}
-                  contentFit="cover"
-                />
-                {editing && (
-                  <View
-                    pointerEvents="none"
-                    className="absolute inset-0 items-center justify-center bg-ink/40 rounded-sm">
-                    <Text className="text-caption font-sans-medium text-background">Change</Text>
-                  </View>
-                )}
-              </Pressable>
+              <Avatar name={me.name} seed={me.id} size={104} />
               <View className="flex-1 gap-xs">
                 {editing ? (
                   <TextInput

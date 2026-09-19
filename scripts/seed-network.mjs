@@ -1,10 +1,19 @@
 // Seeds the local Supabase database with demo network accounts so the app
 // isn't an empty directory on a fresh `supabase db reset`. Each person is a
 // real, auto-confirmed account (not a fake row) — the app can't tell the
-// difference between these and someone who actually signed up.
+// difference between these and someone who actually signed up. Tagged
+// is_demo so they can be filtered out of anything that shouldn't count them.
 //
 // Usage: node scripts/seed-network.mjs
 // Requires the local stack to be running (`npx supabase start`).
+
+const configuredUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+if (configuredUrl && !/localhost|127\.0\.0\.1/.test(configuredUrl)) {
+  console.error(
+    `Refusing to seed demo accounts: EXPO_PUBLIC_SUPABASE_URL is "${configuredUrl}", not a local instance.`
+  );
+  process.exit(1);
+}
 
 const API_URL = 'http://127.0.0.1:54321';
 // Local dev's well-known service role key (from `supabase start` output) —
@@ -18,7 +27,6 @@ const PEOPLE = [
     name: 'Dana Osei',
     city: 'Lima', lat: -12.05, lng: -77.04,
     role: 'Banking, Mibanco',
-    photo_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=600&auto=format&fit=crop',
     offer_category: 'Career intro',
     offer_text: 'Can introduce you to hiring managers at banks in Peru.',
     skills: ['Banking', 'Hiring intros', 'Peru market'],
@@ -28,7 +36,6 @@ const PEOPLE = [
     name: 'Marco Téllez',
     city: 'Mexico City', lat: 19.43, lng: -99.13,
     role: 'Founder, Cursana',
-    photo_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=600&auto=format&fit=crop',
     offer_category: 'Founder advice',
     offer_text: 'Happy to talk through early fundraising and hiring your first ten.',
     skills: ['Fundraising', 'Early hiring', 'Go-to-market'],
@@ -38,7 +45,6 @@ const PEOPLE = [
     name: 'Priya Nair',
     city: 'Singapore', lat: 1.35, lng: 103.82,
     role: 'Product, Grab',
-    photo_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop',
     offer_category: 'Mentorship',
     offer_text: 'Mentoring PMs moving from consulting into tech.',
     skills: ['Product mentorship', 'Career switches', 'Interview prep'],
@@ -48,7 +54,6 @@ const PEOPLE = [
     name: 'Jonas Weber',
     city: 'Berlin', lat: 52.52, lng: 13.4,
     role: 'Engineering lead, Zalando',
-    photo_url: 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=600&auto=format&fit=crop',
     offer_category: 'Technical help',
     offer_text: 'Can review your infra setup or sit in on a technical interview loop.',
     skills: ['Infra reviews', 'Interview loops', 'Engineering hiring'],
@@ -58,7 +63,6 @@ const PEOPLE = [
     name: 'Amara Diallo',
     city: 'Dakar', lat: 14.72, lng: -17.47,
     role: 'Wealth management, SGBS',
-    photo_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop',
     offer_category: 'Financial advice',
     offer_text: 'Personal finance guidance from ten years in banking.',
     skills: ['Personal finance', 'Savings planning', 'Banking'],
@@ -68,9 +72,8 @@ const PEOPLE = [
     name: 'Felipe Arango',
     city: 'Bogotá', lat: 4.71, lng: -74.07,
     role: 'Runs a walking-tour company',
-    photo_url: 'https://images.unsplash.com/photo-1531123897727-8f129e1688ce?q=80&w=600&auto=format&fit=crop',
     offer_category: 'Local guide',
-    offer_text: 'Knows Bogotá well — good for a first trip or a relocation.',
+    offer_text: 'Knows Bogotá well, good for a first trip or a relocation.',
     skills: ['Local tips', 'Relocation', 'City tours'],
   },
 ];
@@ -105,11 +108,11 @@ for (const person of PEOPLE) {
     city: person.city,
     lat: person.lat,
     lng: person.lng,
-    photo_url: person.photo_url,
     bio: person.offer_text,
     offer_category: person.offer_category,
     offer_text: person.offer_text,
     skills: person.skills,
+    is_demo: true,
   });
 
   console.log(`seeded ${person.name} -> ${created.id}`);

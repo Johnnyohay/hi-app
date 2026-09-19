@@ -1,9 +1,9 @@
-import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, Text, View, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Avatar } from '@/components/avatar';
 import { ContentMaxWidth, ListPaneWidth } from '@/constants/theme';
 import { colorTokens } from '@/constants/tokens';
 import { useAuth } from '@/lib/auth-context';
@@ -118,11 +118,7 @@ function DetailCard({ person, onMessage }: { person: Profile; onMessage: () => v
   return (
     <View className="gap-md">
       <View className="flex-row gap-md items-center">
-        <Image
-          source={{ uri: person.photo_url ?? undefined }}
-          style={{ width: 64, height: 64, borderRadius: 4 }}
-          contentFit="cover"
-        />
+        <Avatar name={person.name} seed={person.id} size={64} />
         <View className="flex-1 gap-xs">
           <Text className="text-title font-serif-medium text-ink dark:text-ink-dark">{person.name}</Text>
           <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
@@ -159,11 +155,7 @@ function MeDetailCard({ me }: { me: Profile }) {
   return (
     <View className="gap-md">
       <View className="flex-row gap-md items-center">
-        <Image
-          source={{ uri: me.photo_url ?? undefined }}
-          style={{ width: 64, height: 64, borderRadius: 4 }}
-          contentFit="cover"
-        />
+        <Avatar name={me.name} seed={me.id} size={64} />
         <View className="flex-1 gap-xs">
           <Text className="text-title font-serif-medium text-ink dark:text-ink-dark">
             {me.name} (you)

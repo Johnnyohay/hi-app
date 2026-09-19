@@ -39,12 +39,6 @@
           "imageWidth": 76
         }
       ],
-      [
-        "expo-image-picker",
-        {
-          "photosPermission": "Hi uses your photo library so you can set a profile picture."
-        }
-      ],
       "expo-web-browser"
     ],
     "experiments": {

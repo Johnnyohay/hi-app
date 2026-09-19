@@ -1,6 +1,6 @@
-import { Image } from 'expo-image';
 import { Pressable, Text, View } from 'react-native';
 
+import { Avatar } from '@/components/avatar';
 import type { Profile } from '@/lib/api';
 
 export function PersonRow({
@@ -18,11 +18,7 @@ export function PersonRow({
       className={`flex-row gap-md px-lg py-lg border-b border-hairline dark:border-hairline-dark active:opacity-60 ${
         selected ? 'bg-surface dark:bg-surface-dark' : ''
       }`}>
-      <Image
-        source={{ uri: person.photo_url ?? undefined }}
-        style={{ width: 72, height: 72, borderRadius: 4 }}
-        contentFit="cover"
-      />
+      <Avatar name={person.name} seed={person.id} size={72} />
       <View className="flex-1 gap-xs">
         <View className="flex-row items-baseline justify-between">
           <Text className="text-title font-serif-medium text-ink dark:text-ink-dark">
