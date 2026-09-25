@@ -6,7 +6,7 @@ const DOC_MAX_WIDTH = 760;
 
 function H2({ children }: { children: string }) {
   return (
-    <Text className="text-title font-serif-medium text-ink dark:text-ink-dark mt-2xl mb-xs">
+    <Text className="text-title font-serif-medium text-ink dark:text-ink-dark mt-4xl mb-sm">
       {children}
     </Text>
   );
@@ -14,7 +14,7 @@ function H2({ children }: { children: string }) {
 
 function P({ children }: { children: React.ReactNode }) {
   return (
-    <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark mt-xs" style={{ lineHeight: 22 }}>
+    <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark mt-md" style={{ lineHeight: 28 }}>
       {children}
     </Text>
   );
@@ -24,8 +24,8 @@ export default function PrivacyPolicyScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={['top', 'left', 'right']}>
       <ScrollView contentContainerClassName="items-center pb-4xl">
-        <View className="w-full px-lg pt-2xl" style={{ maxWidth: DOC_MAX_WIDTH }}>
-          <Pressable onPress={() => router.back()} className="self-start mb-xl" hitSlop={8}>
+        <View className="w-full px-lg pt-4xl" style={{ maxWidth: DOC_MAX_WIDTH }}>
+          <Pressable onPress={() => router.back()} className="self-start mb-2xl" hitSlop={8}>
             <Text className="text-label font-sans-medium text-accent dark:text-accent-dark">‹ Back</Text>
           </Pressable>
 
@@ -124,6 +124,12 @@ export default function PrivacyPolicyScreen() {
             </Text>
             .
           </P>
+
+          <View className="mt-4xl pt-2xl border-t border-hairline dark:border-hairline-dark">
+            <Text className="text-caption font-mono text-ink-muted dark:text-ink-muted-dark">
+              © 2026 Hi. All rights reserved.
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

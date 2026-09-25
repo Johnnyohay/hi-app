@@ -6,7 +6,7 @@ const DOC_MAX_WIDTH = 760;
 
 function H2({ children }: { children: string }) {
   return (
-    <Text className="text-title font-serif-medium text-ink dark:text-ink-dark mt-2xl mb-xs">
+    <Text className="text-title font-serif-medium text-ink dark:text-ink-dark mt-4xl mb-sm">
       {children}
     </Text>
   );
@@ -14,7 +14,7 @@ function H2({ children }: { children: string }) {
 
 function P({ children }: { children: React.ReactNode }) {
   return (
-    <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark mt-xs" style={{ lineHeight: 22 }}>
+    <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark mt-md" style={{ lineHeight: 28 }}>
       {children}
     </Text>
   );
@@ -24,8 +24,8 @@ export default function TermsOfServiceScreen() {
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={['top', 'left', 'right']}>
       <ScrollView contentContainerClassName="items-center pb-4xl">
-        <View className="w-full px-lg pt-2xl" style={{ maxWidth: DOC_MAX_WIDTH }}>
-          <Pressable onPress={() => router.back()} className="self-start mb-xl" hitSlop={8}>
+        <View className="w-full px-lg pt-4xl" style={{ maxWidth: DOC_MAX_WIDTH }}>
+          <Pressable onPress={() => router.back()} className="self-start mb-2xl" hitSlop={8}>
             <Text className="text-label font-sans-medium text-accent dark:text-accent-dark">‹ Back</Text>
           </Pressable>
 
@@ -87,7 +87,28 @@ export default function TermsOfServiceScreen() {
             any photo you upload.
           </P>
 
-          <H2>6. Disclaimers</H2>
+          <H2>6. Copyright &amp; intellectual property</H2>
+          <P>
+            The Hi name, logo, and the app&apos;s design, software, and underlying code are owned by
+            Hi&apos;s operator and protected by copyright, trademark, and other applicable laws. Using
+            the app gives you no ownership or license to that material beyond what&apos;s needed to
+            use Hi as intended. You may not copy, modify, reverse-engineer, scrape, or redistribute
+            the app, its source code, or its branding without prior written permission.
+          </P>
+          <P>
+            If you believe content posted by another member infringes your copyright, send us a
+            notice that includes: (1) a description of the copyrighted work you believe was
+            infringed; (2) where in the app the infringing material appears; (3) your contact
+            information; and (4) a statement, made in good faith and under penalty of perjury, that
+            the use is unauthorized and that your notice is accurate. Send copyright notices via{' '}
+            <Text className="text-accent dark:text-accent-dark">
+              github.com/Johnnyohay/hi-app/issues
+            </Text>
+            . We&apos;ll review valid notices, remove infringing content, and may terminate the
+            accounts of members who repeatedly infringe others&apos; copyrights.
+          </P>
+
+          <H2>7. Disclaimers</H2>
           <P>
             Hi is provided &quot;as is,&quot; without warranties of any kind, express or implied. We don&apos;t
             guarantee the app will be uninterrupted, error-free, or secure, and we&apos;re not
@@ -95,7 +116,7 @@ export default function TermsOfServiceScreen() {
             anything another member posts.
           </P>
 
-          <H2>7. Limitation of liability</H2>
+          <H2>8. Limitation of liability</H2>
           <P>
             To the fullest extent the law allows, Hi and its operator won&apos;t be liable for any
             indirect, incidental, or consequential damages arising from your use of the app, or for
@@ -104,27 +125,27 @@ export default function TermsOfServiceScreen() {
             twelve months before the claim.
           </P>
 
-          <H2>8. Indemnification</H2>
+          <H2>9. Indemnification</H2>
           <P>
             You agree to cover any claims, damages, or costs arising from your own violation of
             these terms or misuse of the app.
           </P>
 
-          <H2>9. Termination</H2>
+          <H2>10. Termination</H2>
           <P>
             You can stop using Hi and request account deletion at any time. We can suspend or
             terminate your access for violating these terms or for any other reason, with or
             without notice.
           </P>
 
-          <H2>10. Changes</H2>
+          <H2>11. Changes</H2>
           <P>
             We may update these terms as the app changes. If we do, we&apos;ll update the date at the
             top of this page; continuing to use Hi after a change means you accept the updated
             terms.
           </P>
 
-          <H2>11. Contact</H2>
+          <H2>12. Contact</H2>
           <P>
             Questions about these terms can be sent via{' '}
             <Text className="text-accent dark:text-accent-dark">
@@ -132,6 +153,12 @@ export default function TermsOfServiceScreen() {
             </Text>
             .
           </P>
+
+          <View className="mt-4xl pt-2xl border-t border-hairline dark:border-hairline-dark">
+            <Text className="text-caption font-mono text-ink-muted dark:text-ink-muted-dark">
+              © 2026 Hi. All rights reserved.
+            </Text>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
