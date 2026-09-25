@@ -10,14 +10,14 @@ input:focus {
 html,
 body,
 #root {
-  background-color: #fafaf9;
+  background-color: #f6f1e7;
 }
 
 @media (prefers-color-scheme: dark) {
   html,
   body,
   #root {
-    background-color: #131316;
+    background-color: #17140f;
   }
 }
 

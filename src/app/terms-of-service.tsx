@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const DOC_MAX_WIDTH = 680;
+const DOC_MAX_WIDTH = 760;
 
 function H2({ children }: { children: string }) {
   return (

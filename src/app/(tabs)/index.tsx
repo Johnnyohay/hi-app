@@ -20,7 +20,7 @@ import { useIsWideScreen } from '@/hooks/use-breakpoint';
 import { useAuth } from '@/lib/auth-context';
 import { fetchNetwork, matchPeopleForAsk, postAsk, type Profile } from '@/lib/api';
 
-const COMPOSER_MAX_WIDTH = 800;
+const COMPOSER_MAX_WIDTH = 1040;
 
 function CategoryChip({
   label,

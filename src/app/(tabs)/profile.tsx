@@ -34,7 +34,7 @@ import {
   type Rating,
 } from '@/lib/api';
 
-const PROFILE_MAX_WIDTH = 800;
+const PROFILE_MAX_WIDTH = 1040;
 
 function SectionLabel({ children }: { children: string }) {
   return (

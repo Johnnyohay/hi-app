@@ -7,7 +7,7 @@ import { colorTokens } from '@/constants/tokens';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { oauthProviders, useAuth, type OAuthProviderId } from '@/lib/auth-context';
 
-const SIGN_IN_MAX_WIDTH = 480;
+const SIGN_IN_MAX_WIDTH = 560;
 
 type Mode = 'signin' | 'signup';
 

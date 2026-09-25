@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const ABOUT_MAX_WIDTH = 640;
+const ABOUT_MAX_WIDTH = 760;
 
 function SectionLabel({ children }: { children: string }) {
   return (

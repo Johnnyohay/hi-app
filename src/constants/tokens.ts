@@ -3,27 +3,27 @@
  * Consumed by tailwind.config.ts (NativeWind utility classes) and by
  * src/constants/theme.ts (native color-scheme switching, non-NativeWind styles).
  *
- * "Field Index" direction: a flat, utilitarian directory rather than a warm
- * lifestyle app — cool neutrals, one confident blue, no warmth-signaling
- * cream/terracotta pairing.
+ * Colors: back to the original warm palette. Type (IBM Plex Sans/Mono) and
+ * the sharper "Field Index" corner radii stayed from that redesign pass —
+ * only the color direction was reverted.
  */
 
 export const colorTokens = {
   light: {
-    background: '#FAFAF9', // cool near-white, not warm cream
-    surface: '#FFFFFF', // rows, sunken fields, dividers between sections
-    ink: '#14161A', // primary text, cool near-black
-    inkMuted: '#5B6169', // secondary text, meta
-    accent: '#2B5FA6', // confident blue — CTAs, active states, links only
-    hairline: '#DFE2E6', // borders, rules
+    background: '#F6F1E7', // warm parchment, not #FFFFFF
+    surface: '#EDE6D6', // rows, sunken fields, dividers between sections
+    ink: '#221F1B', // primary text, not #000000
+    inkMuted: '#6B6559', // secondary text, meta
+    accent: '#A63D2F', // terracotta — CTAs, active states, links only
+    hairline: '#DED5C2', // borders, rules
   },
   dark: {
-    background: '#131316',
-    surface: '#1C1B20',
-    ink: '#ECEDEF',
-    inkMuted: '#9AA0A8',
-    accent: '#6FA3E0',
-    hairline: '#2E2D33',
+    background: '#17140F',
+    surface: '#211D16',
+    ink: '#F3ECDE',
+    inkMuted: '#A79C89',
+    accent: '#E2694F',
+    hairline: '#332D22',
   },
 } as const;
 
