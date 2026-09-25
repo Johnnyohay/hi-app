@@ -1,5 +1,6 @@
 import { Tabs, TabList, TabTrigger, TabSlot, TabTriggerSlotProps, TabListProps } from 'expo-router/ui';
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
 
 import { ThemedText } from './themed-text';
@@ -50,7 +51,7 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
 }
 
 function AboutPanel({ colors, onClose }: { colors: Record<ThemeColor, string>; onClose: () => void }) {
-  return (
+  const content = (
     <View style={styles.overlay}>
       <Pressable style={styles.backdrop} onPress={onClose} />
       <View
@@ -83,6 +84,13 @@ function AboutPanel({ colors, onClose }: { colors: Record<ThemeColor, string>; o
       </View>
     </View>
   );
+
+  // Rendered straight onto <body> via portal rather than relying on
+  // `position: fixed` inside a nested View — that CSS value isn't reliably
+  // supported across React Native Web versions, and a silently-dropped
+  // position turns this into an invisible box trapped inside the toolbar.
+  if (typeof document === 'undefined') return null;
+  return createPortal(content, document.body);
 }
 
 export function CustomTabList(props: TabListProps) {
@@ -147,7 +155,7 @@ const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   overlay: {
-    position: 'fixed',
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
