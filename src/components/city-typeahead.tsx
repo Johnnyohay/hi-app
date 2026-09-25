@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, TextInput, View, useColorScheme } from 'react-native';
 
+import { colorTokens } from '@/constants/tokens';
 import { searchCities, type CitySuggestion } from '@/lib/geocoding';
 
 export function CityTypeahead({
@@ -20,6 +21,8 @@ export function CityTypeahead({
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scheme = useColorScheme();
+  const colors = colorTokens[scheme === 'dark' ? 'dark' : 'light'];
 
   useEffect(() => {
     return () => {
@@ -69,8 +72,23 @@ export function CityTypeahead({
 
       {open && (loading || suggestions.length > 0) && (
         <View
-          className="rounded-sm border border-hairline dark:border-hairline-dark bg-background dark:bg-background-dark mt-xs"
-          style={{ position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 20 }}>
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            zIndex: 20,
+            marginTop: 4,
+            backgroundColor: colors.surface,
+            borderWidth: 1,
+            borderColor: colors.hairline,
+            borderRadius: 2,
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 2 },
+            shadowOpacity: 0.15,
+            shadowRadius: 6,
+            elevation: 6,
+          }}>
           {loading ? (
             <View className="px-md py-sm">
               <ActivityIndicator size="small" />
