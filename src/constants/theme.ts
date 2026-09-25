@@ -24,9 +24,9 @@ export const Fonts = Platform.select({
     mono: 'var(--font-mono)',
   },
   default: {
-    serif: 'Fraunces_600SemiBold',
-    sans: 'Geist_400Regular',
-    mono: 'ui-monospace',
+    serif: 'IBMPlexSans_700Bold',
+    sans: 'IBMPlexSans_400Regular',
+    mono: 'IBMPlexMono_400Regular',
   },
 });
 

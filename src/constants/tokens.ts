@@ -3,26 +3,27 @@
  * Consumed by tailwind.config.ts (NativeWind utility classes) and by
  * src/constants/theme.ts (native color-scheme switching, non-NativeWind styles).
  *
- * Palette: one warm neutral background, one ink, one accent — used sparingly.
- * No blues, no purples, no rainbow category colors.
+ * "Field Index" direction: a flat, utilitarian directory rather than a warm
+ * lifestyle app — cool neutrals, one confident blue, no warmth-signaling
+ * cream/terracotta pairing.
  */
 
 export const colorTokens = {
   light: {
-    background: '#F6F1E7', // warm parchment, not #FFFFFF
-    surface: '#EDE6D6', // rows, sunken fields, dividers between sections
-    ink: '#221F1B', // primary text, not #000000
-    inkMuted: '#6B6559', // secondary text, meta
-    accent: '#A63D2F', // terracotta — CTAs, active states, links only
-    hairline: '#DED5C2', // borders, rules
+    background: '#FAFAF9', // cool near-white, not warm cream
+    surface: '#FFFFFF', // rows, sunken fields, dividers between sections
+    ink: '#14161A', // primary text, cool near-black
+    inkMuted: '#5B6169', // secondary text, meta
+    accent: '#2B5FA6', // confident blue — CTAs, active states, links only
+    hairline: '#DFE2E6', // borders, rules
   },
   dark: {
-    background: '#17140F',
-    surface: '#211D16',
-    ink: '#F3ECDE',
-    inkMuted: '#A79C89',
-    accent: '#E2694F',
-    hairline: '#332D22',
+    background: '#131316',
+    surface: '#1C1B20',
+    ink: '#ECEDEF',
+    inkMuted: '#9AA0A8',
+    accent: '#6FA3E0',
+    hairline: '#2E2D33',
   },
 } as const;
 
@@ -30,16 +31,23 @@ export type ColorScheme = keyof typeof colorTokens;
 export type ColorToken = keyof typeof colorTokens.light;
 
 export const fontFamilyTokens = {
+  // Kept the "serif" key name so every existing `font-serif*` className
+  // across the app still resolves correctly — only the typeface changed,
+  // from Fraunces to IBM Plex Sans's bolder weights for display/title text.
   serif: {
-    regular: 'Fraunces_400Regular',
-    medium: 'Fraunces_500Medium',
-    semibold: 'Fraunces_600SemiBold',
-    semiboldItalic: 'Fraunces_600SemiBold_Italic',
+    regular: 'IBMPlexSans_500Medium',
+    medium: 'IBMPlexSans_600SemiBold',
+    semibold: 'IBMPlexSans_700Bold',
+    semiboldItalic: 'IBMPlexSans_700Bold_Italic',
   },
   sans: {
-    regular: 'Geist_400Regular',
-    medium: 'Geist_500Medium',
-    semibold: 'Geist_600SemiBold',
+    regular: 'IBMPlexSans_400Regular',
+    medium: 'IBMPlexSans_500Medium',
+    semibold: 'IBMPlexSans_600SemiBold',
+  },
+  mono: {
+    regular: 'IBMPlexMono_400Regular',
+    medium: 'IBMPlexMono_500Medium',
   },
 } as const;
 
@@ -52,13 +60,13 @@ export const typeScale = {
     fontFamily: fontFamilyTokens.serif.semibold,
     fontSize: 42,
     lineHeight: 48,
-    letterSpacing: -0.6,
+    letterSpacing: -0.2,
   },
   title: {
     fontFamily: fontFamilyTokens.serif.medium,
     fontSize: 26,
     lineHeight: 32,
-    letterSpacing: -0.3,
+    letterSpacing: -0.1,
   },
   body: {
     fontFamily: fontFamilyTokens.sans.regular,
@@ -73,16 +81,16 @@ export const typeScale = {
     letterSpacing: 0,
   },
   label: {
-    fontFamily: fontFamilyTokens.sans.medium,
-    fontSize: 14,
-    lineHeight: 20,
-    letterSpacing: 0.3,
+    fontFamily: fontFamilyTokens.mono.medium,
+    fontSize: 13,
+    lineHeight: 19,
+    letterSpacing: 0.4,
   },
   caption: {
-    fontFamily: fontFamilyTokens.sans.regular,
-    fontSize: 13,
-    lineHeight: 18,
-    letterSpacing: 0.2,
+    fontFamily: fontFamilyTokens.mono.regular,
+    fontSize: 12,
+    lineHeight: 17,
+    letterSpacing: 0.3,
   },
 } as const;
 
@@ -102,9 +110,9 @@ export const spacingTokens = {
 
 export type SpacingToken = keyof typeof spacingTokens;
 
-/** Sharp, editorial — never pill-shaped or glassy. */
+/** Sharp and flat — a directory, not a stack of soft cards. */
 export const radiusTokens = {
   none: 0,
-  sm: 4,
-  md: 10,
+  sm: 2,
+  md: 4,
 } as const;

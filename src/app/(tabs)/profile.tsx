@@ -38,7 +38,7 @@ const PROFILE_MAX_WIDTH = 800;
 
 function SectionLabel({ children }: { children: string }) {
   return (
-    <Text className="text-label font-sans-medium text-ink-muted dark:text-ink-muted-dark uppercase">
+    <Text className="text-label font-mono-medium text-ink-muted dark:text-ink-muted-dark uppercase">
       {children}
     </Text>
   );

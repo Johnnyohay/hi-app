@@ -24,6 +24,8 @@ export default {
         sans: [fontFamilyTokens.sans.regular],
         'sans-medium': [fontFamilyTokens.sans.medium],
         'sans-semibold': [fontFamilyTokens.sans.semibold],
+        mono: [fontFamilyTokens.mono.regular],
+        'mono-medium': [fontFamilyTokens.mono.medium],
       },
       fontSize,
       colors: {

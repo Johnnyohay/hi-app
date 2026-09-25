@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import Animated, { Easing, Keyframe } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 
-import { colorTokens } from '@/constants/tokens';
+import { colorTokens, radiusTokens } from '@/constants/tokens';
 
 const DURATION = 400;
 
@@ -65,13 +65,13 @@ const styles = StyleSheet.create({
   badge: {
     width: 96,
     height: 96,
-    borderRadius: 10,
+    borderRadius: radiusTokens.md,
     backgroundColor: colorTokens.light.ink,
     alignItems: 'center',
     justifyContent: 'center',
   },
   wordmark: {
-    fontFamily: 'Fraunces_600SemiBold',
+    fontFamily: 'IBMPlexSans_700Bold',
     fontSize: 36,
     lineHeight: 40,
     color: colorTokens.light.background,

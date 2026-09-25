@@ -105,7 +105,7 @@ export default function AskScreen() {
         <View className="flex-1 items-center">
           <View className="flex-1 w-full" style={{ maxWidth: COMPOSER_MAX_WIDTH }}>
             <View className="px-lg pt-2xl pb-lg gap-xs">
-              <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark uppercase">
+              <Text className="text-caption font-mono text-ink-muted dark:text-ink-muted-dark uppercase">
                 {submittedCategory?.label} ·{' '}
                 {matches.length > 0
                   ? `${matches.length} match${matches.length === 1 ? '' : 'es'}`

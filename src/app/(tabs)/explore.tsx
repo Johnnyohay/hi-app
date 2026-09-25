@@ -118,7 +118,7 @@ function NetworkHeader({
           returnKeyType="search"
         />
 
-        <Text className="text-caption font-sans-medium text-ink-muted dark:text-ink-muted-dark uppercase mt-xs">
+        <Text className="text-caption font-mono-medium text-ink-muted dark:text-ink-muted-dark uppercase mt-xs">
           What they can offer
         </Text>
         <View className="flex-row flex-wrap gap-xs">

@@ -1,6 +1,6 @@
 import { Image, Text, View, useColorScheme } from 'react-native';
 
-import { colorTokens } from '@/constants/tokens';
+import { colorTokens, radiusTokens } from '@/constants/tokens';
 
 /** Initials from a name: first + last word, or just the first letter for a single word. */
 export function initialsFor(name: string): string {
@@ -38,7 +38,7 @@ export function Avatar({
     return (
       <Image
         source={{ uri: photoUrl }}
-        style={{ width: size, height: size, borderRadius: 4 }}
+        style={{ width: size, height: size, borderRadius: radiusTokens.sm }}
       />
     );
   }
@@ -48,7 +48,7 @@ export function Avatar({
       style={{
         width: size,
         height: size,
-        borderRadius: 4,
+        borderRadius: radiusTokens.sm,
         backgroundColor: variant === 'ink' ? colors.ink : colors.accent,
         alignItems: 'center',
         justifyContent: 'center',
@@ -56,7 +56,7 @@ export function Avatar({
       <Text
         style={{
           color: colors.background,
-          fontFamily: 'Fraunces_600SemiBold',
+          fontFamily: 'IBMPlexSans_700Bold',
           fontSize: size * 0.4,
         }}>
         {initialsFor(name)}

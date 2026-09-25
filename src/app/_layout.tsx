@@ -1,5 +1,11 @@
-import { Fraunces_500Medium, Fraunces_600SemiBold, useFonts as useFrauncesFonts } from '@expo-google-fonts/fraunces';
-import { Geist_400Regular, Geist_500Medium, Geist_600SemiBold, useFonts as useGeistFonts } from '@expo-google-fonts/geist';
+import {
+  IBMPlexSans_400Regular,
+  IBMPlexSans_500Medium,
+  IBMPlexSans_600SemiBold,
+  IBMPlexSans_700Bold,
+  useFonts as usePlexSansFonts,
+} from '@expo-google-fonts/ibm-plex-sans';
+import { IBMPlexMono_400Regular, IBMPlexMono_500Medium, useFonts as usePlexMonoFonts } from '@expo-google-fonts/ibm-plex-mono';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, usePathname, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
@@ -15,8 +21,13 @@ export default function RootLayout() {
   const colorScheme = useColorScheme();
   const router = useRouter();
   const pathname = usePathname();
-  const [frauncesLoaded] = useFrauncesFonts({ Fraunces_500Medium, Fraunces_600SemiBold });
-  const [geistLoaded] = useGeistFonts({ Geist_400Regular, Geist_500Medium, Geist_600SemiBold });
+  const [plexSansLoaded] = usePlexSansFonts({
+    IBMPlexSans_400Regular,
+    IBMPlexSans_500Medium,
+    IBMPlexSans_600SemiBold,
+    IBMPlexSans_700Bold,
+  });
+  const [plexMonoLoaded] = usePlexMonoFonts({ IBMPlexMono_400Regular, IBMPlexMono_500Medium });
 
   // The tabs group owns "/" (native uses initialRouteName instead, above),
   // so on web a fresh visit to the bare root is sent to sign-in first. Runs
@@ -28,7 +39,7 @@ export default function RootLayout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (!frauncesLoaded || !geistLoaded) {
+  if (!plexSansLoaded || !plexMonoLoaded) {
     return null;
   }
 

@@ -10,23 +10,23 @@ input:focus {
 html,
 body,
 #root {
-  background-color: #f6f1e7;
+  background-color: #fafaf9;
 }
 
 @media (prefers-color-scheme: dark) {
   html,
   body,
   #root {
-    background-color: #17140f;
+    background-color: #131316;
   }
 }
 
 :root {
   --font-serif:
-    'Fraunces', 'Source Serif 4', Georgia, 'Times New Roman', serif;
+    'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-sans:
-    'Geist', ui-sans-serif, system-ui, -apple-system, sans-serif;
+    'IBM Plex Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono:
-    ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New',
-    monospace;
+    'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+    'Courier New', monospace;
 }

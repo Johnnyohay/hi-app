@@ -25,7 +25,7 @@ export function PersonRow({
             {person.name}
           </Text>
           {person.offer_category && (
-            <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark uppercase">
+            <Text className="text-caption font-mono text-ink-muted dark:text-ink-muted-dark uppercase">
               {person.offer_category}
             </Text>
           )}
