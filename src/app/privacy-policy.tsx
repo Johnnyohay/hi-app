@@ -54,15 +54,16 @@ export default function PrivacyPolicyScreen() {
             background, and never required.
           </P>
           <P>
-            Content you create while using the app: messages you send, requests (&quot;asks&quot;) you post,
-            and ratings you give other members.
+            Content you create: messages you send in a one-to-one chat, requests (&quot;asks&quot;) you share
+            alongside your profile, and ratings you give other members. There&apos;s no public feed —
+            just these two things and your profile.
           </P>
 
           <H2>Who can see what</H2>
           <P>
             Hi is a directory, not a private diary — your name, role, city, bio, skills, and what
             you offer are visible to every other signed-in member; that visibility is how matching
-            works. The same is true for requests you post.
+            works. The same is true for the requests you share.
           </P>
           <P>
             Messages are different: only you and the other person in a conversation can read it.

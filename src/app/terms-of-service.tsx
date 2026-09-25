@@ -52,7 +52,8 @@ export default function TermsOfServiceScreen() {
             Hi surfaces new connections based on genuine needs and interests — matching what
             you&apos;re looking for against what other members say they can offer, and vice versa.
             We don&apos;t verify
-            members&apos; identities, credentials, or the truth of what they post, and we don&apos;t
+            members&apos; identities, credentials, or the truth of what&apos;s in their profile or
+            requests, and we don&apos;t
             background-check anyone. Use ordinary judgment before meeting someone or acting on
             something you read here, the same as you would with an introduction from anyone else.
           </P>
@@ -61,8 +62,8 @@ export default function TermsOfServiceScreen() {
           <P>You agree not to:</P>
           <P>
             • Harass, threaten, impersonate, or deceive other members{'\n'}
-            • Post false, misleading, or illegal content, or content you don&apos;t have the right to
-            share{'\n'}
+            • Put false, misleading, or illegal information in your profile, requests, or messages,
+            or anything you don&apos;t have the right to share{'\n'}
             • Use the app for unsolicited advertising, spam, or recruiting unrelated to a genuine
             ask or offer{'\n'}
             • Scrape, mass-collect, or automate access to other members&apos; data{'\n'}
@@ -76,14 +77,15 @@ export default function TermsOfServiceScreen() {
 
           <H2>5. Your content</H2>
           <P>
-            You keep ownership of what you post — your profile, messages, requests, photos. By
-            posting it, you give Hi the license needed to store it and show it to the other
-            members it&apos;s meant for (for example, showing your profile to the network, or
-            delivering your message to its recipient) — nothing more, and we don&apos;t use it for
-            advertising or sell it.
+            Hi doesn&apos;t have a public feed or open-ended posting — what you share is your profile
+            (including any photo), the requests you post alongside it, and the messages you send in
+            a one-to-one chat. You keep ownership of all of it. By sharing it, you give Hi the
+            license needed to store it and show it to the people it&apos;s meant for — your profile and
+            requests to the rest of the network, your messages only to the person you sent them to
+            — nothing more, and we don&apos;t use it for advertising or sell it.
           </P>
           <P>
-            You&apos;re responsible for content you post and for having the right to post it — including
+            You&apos;re responsible for what you share and for having the right to share it — including
             any photo you upload.
           </P>
 
@@ -96,11 +98,12 @@ export default function TermsOfServiceScreen() {
             the app, its source code, or its branding without prior written permission.
           </P>
           <P>
-            If you believe content posted by another member infringes your copyright, send us a
-            notice that includes: (1) a description of the copyrighted work you believe was
-            infringed; (2) where in the app the infringing material appears; (3) your contact
-            information; and (4) a statement, made in good faith and under penalty of perjury, that
-            the use is unauthorized and that your notice is accurate. Send copyright notices via{' '}
+            If you believe something in another member&apos;s profile or requests — or a photo or
+            message they&apos;ve sent you — infringes your copyright, send us a notice that includes:
+            (1) a description of the copyrighted work you believe was infringed; (2) where in the
+            app the infringing material appears; (3) your contact information; and (4) a statement,
+            made in good faith and under penalty of perjury, that the use is unauthorized and that
+            your notice is accurate. Send copyright notices via{' '}
             <Text className="text-accent dark:text-accent-dark">
               github.com/Johnnyohay/hi-app/issues
             </Text>
@@ -113,7 +116,7 @@ export default function TermsOfServiceScreen() {
             Hi is provided &quot;as is,&quot; without warranties of any kind, express or implied. We don&apos;t
             guarantee the app will be uninterrupted, error-free, or secure, and we&apos;re not
             responsible for the conduct of any member, on or off the app, or for the accuracy of
-            anything another member posts.
+            what&apos;s in their profile, requests, or messages.
           </P>
 
           <H2>8. Limitation of liability</H2>
