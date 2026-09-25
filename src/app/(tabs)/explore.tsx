@@ -3,7 +3,6 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, FlatList, Pressable, Text, TextInput, View, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { BrandHeader } from '@/components/brand-header';
 import { PersonRow } from '@/components/person-row';
 import { ThreadView } from '@/components/thread-view';
 import { askCategories, type AskCategoryId } from '@/constants/mock-network';
@@ -210,7 +209,6 @@ export default function NetworkScreen() {
   if (isWide) {
     return (
       <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={['left', 'right']}>
-        <BrandHeader />
         <View className="flex-1 items-center">
           <View className="flex-1 flex-row w-full" style={{ maxWidth: ContentMaxWidth }}>
             <View
@@ -247,7 +245,6 @@ export default function NetworkScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={['top', 'left', 'right']}>
-      <BrandHeader />
       <FlatList
         data={filteredNetwork}
         keyExtractor={(person) => person.id}

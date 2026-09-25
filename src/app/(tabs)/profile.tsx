@@ -15,7 +15,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
-import { BrandHeader } from '@/components/brand-header';
 import { CityTypeahead } from '@/components/city-typeahead';
 import { askCategories, feedbackTags } from '@/constants/mock-network';
 import { socialPlatforms, socialUrl, type SocialPlatform } from '@/constants/me';
@@ -199,7 +198,6 @@ export default function ProfileScreen() {
     <SafeAreaView
       className="flex-1 bg-background dark:bg-background-dark"
       edges={['top', 'left', 'right']}>
-      <BrandHeader />
       <ScrollView contentContainerClassName="items-center pb-4xl">
         <View className="w-full px-lg pt-2xl" style={{ maxWidth: PROFILE_MAX_WIDTH }}>
           <View className="flex-row items-start justify-between">

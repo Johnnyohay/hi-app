@@ -39,12 +39,13 @@ describe('no domain restriction remains', () => {
     await waitFor(() => expect(result.current.loading).toBe(false));
 
     await act(async () => {
-      await result.current.signUpWithPassword('someone@yahoo.com', 'password123');
+      await result.current.signUpWithPassword('someone@yahoo.com', 'password123', 'Someone');
     });
 
     expect(supabase.auth.signUp).toHaveBeenCalledWith({
       email: 'someone@yahoo.com',
       password: 'password123',
+      options: { data: { full_name: 'Someone' } },
     });
   });
 });

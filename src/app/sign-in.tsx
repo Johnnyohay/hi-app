@@ -14,6 +14,7 @@ type Mode = 'signin' | 'signup';
 export default function SignInScreen() {
   const { session, signInWithPassword, signUpWithPassword, signInWithProvider } = useAuth();
   const [mode, setMode] = useState<Mode>('signin');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -33,12 +34,14 @@ export default function SignInScreen() {
 
   async function handleSubmit() {
     const trimmed = email.trim();
+    const trimmedName = name.trim();
     if (!trimmed || !password) return;
+    if (mode === 'signup' && !trimmedName) return;
 
     const { error } =
       mode === 'signin'
         ? await signInWithPassword(trimmed, password)
-        : await signUpWithPassword(trimmed, password);
+        : await signUpWithPassword(trimmed, password, trimmedName);
 
     if (error) {
       setStatus({ kind: 'error', message: error });
@@ -54,7 +57,10 @@ export default function SignInScreen() {
     if (error) setStatus({ kind: 'error', message: error });
   }
 
-  const canSubmit = email.trim().length > 0 && password.length > 0;
+  const canSubmit =
+    email.trim().length > 0 &&
+    password.length > 0 &&
+    (mode === 'signin' || name.trim().length > 0);
 
   return (
     <SafeAreaView
@@ -119,6 +125,22 @@ export default function SignInScreen() {
               </Text>
             </Pressable>
           </View>
+
+          {mode === 'signup' && (
+            <TextInput
+              className="text-body font-sans text-ink dark:text-ink-dark mt-lg rounded-sm border border-hairline dark:border-hairline-dark px-lg"
+              style={{ minHeight: 48, outlineWidth: 0 }}
+              value={name}
+              onChangeText={(value) => {
+                setName(value);
+                setStatus({ kind: 'idle' });
+              }}
+              placeholder="Your name"
+              placeholderTextColor={placeholderColor}
+              autoCapitalize="words"
+              returnKeyType="next"
+            />
+          )}
 
           <TextInput
             className="text-body font-sans text-ink dark:text-ink-dark mt-lg rounded-sm border border-hairline dark:border-hairline-dark px-lg"

@@ -12,7 +12,7 @@ type AuthContextValue = {
   session: Session | null;
   loading: boolean;
   signInWithPassword: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUpWithPassword: (email: string, password: string) => Promise<{ error: string | null }>;
+  signUpWithPassword: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
   signInWithProvider: (provider: OAuthProviderId) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 };
@@ -46,11 +46,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null };
   }
 
-  async function signUpWithPassword(email: string, password: string) {
+  async function signUpWithPassword(email: string, password: string, fullName: string) {
     if (!isSupabaseConfigured) {
       return { error: 'Backend not connected yet. See setup steps.' };
     }
-    const { error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName } },
+    });
     return { error: error?.message ?? null };
   }
 

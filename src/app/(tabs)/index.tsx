@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { BrandHeader } from '@/components/brand-header';
 import { PersonRow } from '@/components/person-row';
 import { askCategories, type AskCategoryId } from '@/constants/mock-network';
 import { colorTokens } from '@/constants/tokens';
@@ -103,7 +102,6 @@ export default function AskScreen() {
       <SafeAreaView
         className="flex-1 bg-background dark:bg-background-dark"
         edges={['top', 'left', 'right']}>
-        <BrandHeader />
         <View className="flex-1 items-center">
           <View className="flex-1 w-full" style={{ maxWidth: COMPOSER_MAX_WIDTH }}>
             <View className="px-lg pt-2xl pb-lg gap-xs">
@@ -177,7 +175,6 @@ export default function AskScreen() {
       <SafeAreaView
         className="flex-1 bg-background dark:bg-background-dark"
         edges={['top', 'left', 'right']}>
-        <BrandHeader />
         {isWide ? (
           <View className="flex-1 items-center px-lg pt-2xl">{picker}</View>
         ) : (
@@ -234,7 +231,6 @@ export default function AskScreen() {
     <SafeAreaView
       className="flex-1 bg-background dark:bg-background-dark"
       edges={['top', 'left', 'right']}>
-      <BrandHeader />
       <KeyboardAvoidingView
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
