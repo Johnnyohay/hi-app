@@ -70,7 +70,8 @@ export default function SignInScreen() {
         <View className="w-full" style={{ maxWidth: SIGN_IN_MAX_WIDTH }}>
           <Text className="text-display font-serif-semibold text-ink dark:text-ink-dark">Hi</Text>
           <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark mt-sm">
-            No long posts, no redundant pictures. Create meaningful connections for connecting.
+            No long posts, no redundant pictures. New connections, matched by what you need and
+            what you can offer.
           </Text>
 
           {!isSupabaseConfigured && (

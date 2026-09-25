@@ -27,8 +27,9 @@ export default function AboutScreen() {
             What is Hi
           </Text>
           <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark mt-md">
-            No long posts, no redundant pictures. Hi is for asking people you actually know,
-            directly — no feed, no broker, no anonymous accounts. True connections, fast and easy.
+            No long posts, no redundant pictures. Hi generates new connections based on what you
+            need and what you can offer — not a feed to scroll, not a broker in the middle, no
+            anonymous accounts. True connections, fast and easy.
           </Text>
 
           <View className="gap-xs mt-2xl">

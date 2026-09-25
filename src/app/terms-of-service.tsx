@@ -49,8 +49,9 @@ export default function TermsOfServiceScreen() {
 
           <H2>3. What Hi is — and isn&apos;t</H2>
           <P>
-            Hi helps you ask people in your own network for help and connect people who might be
-            able to help each other, based on what members say about themselves. We don&apos;t verify
+            Hi surfaces new connections based on genuine needs and interests — matching what
+            you&apos;re looking for against what other members say they can offer, and vice versa.
+            We don&apos;t verify
             members&apos; identities, credentials, or the truth of what they post, and we don&apos;t
             background-check anyone. Use ordinary judgment before meeting someone or acting on
             something you read here, the same as you would with an introduction from anyone else.
