@@ -15,6 +15,8 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
+import { BrandHeader } from '@/components/brand-header';
+import { CityTypeahead } from '@/components/city-typeahead';
 import { askCategories, feedbackTags } from '@/constants/mock-network';
 import { socialPlatforms, socialUrl, type SocialPlatform } from '@/constants/me';
 import { colorTokens } from '@/constants/tokens';
@@ -174,6 +176,11 @@ export default function ProfileScreen() {
         <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
           Sign in to see your profile.
         </Text>
+        <Pressable onPress={() => router.replace('/sign-in')} hitSlop={8} className="mt-lg">
+          <Text className="text-label font-sans-medium text-accent dark:text-accent-dark">
+            Sign in →
+          </Text>
+        </Pressable>
       </SafeAreaView>
     );
   }
@@ -192,6 +199,7 @@ export default function ProfileScreen() {
     <SafeAreaView
       className="flex-1 bg-background dark:bg-background-dark"
       edges={['top', 'left', 'right']}>
+      <BrandHeader />
       <ScrollView contentContainerClassName="items-center pb-4xl">
         <View className="w-full px-lg pt-2xl" style={{ maxWidth: PROFILE_MAX_WIDTH }}>
           <View className="flex-row items-start justify-between">
@@ -234,12 +242,21 @@ export default function ProfileScreen() {
                   {me.role}
                 </Text>
                 {editing ? (
-                  <View className="gap-xs">
-                    <TextInput
-                      className="text-caption font-sans text-ink dark:text-ink-dark"
-                      style={{ outlineWidth: 0 }}
+                  <View className="gap-xs" style={{ position: 'relative' }}>
+                    <CityTypeahead
                       value={me.city}
                       onChangeText={(city) => setMe((current) => current && { ...current, city })}
+                      onSelectCity={(suggestion) =>
+                        setMe(
+                          (current) =>
+                            current && {
+                              ...current,
+                              city: suggestion.label,
+                              lat: suggestion.lat,
+                              lng: suggestion.lng,
+                            }
+                        )
+                      }
                       placeholder="City"
                       placeholderTextColor={placeholderColor}
                     />
@@ -261,15 +278,22 @@ export default function ProfileScreen() {
               </View>
             </View>
 
-            <Pressable onPress={toggleEditing} hitSlop={8} disabled={saving}>
-              {saving ? (
-                <ActivityIndicator />
-              ) : (
-                <Text className="text-label font-sans-medium text-accent dark:text-accent-dark">
-                  {editing ? 'Done' : 'Edit'}
+            <View className="items-end gap-md">
+              <Pressable onPress={toggleEditing} hitSlop={8} disabled={saving}>
+                {saving ? (
+                  <ActivityIndicator />
+                ) : (
+                  <Text className="text-label font-sans-medium text-accent dark:text-accent-dark">
+                    {editing ? 'Done' : 'Edit'}
+                  </Text>
+                )}
+              </Pressable>
+              <Pressable onPress={() => signOut()} hitSlop={8}>
+                <Text className="text-label font-sans-medium text-ink-muted dark:text-ink-muted-dark">
+                  Sign out
                 </Text>
-              )}
-            </Pressable>
+              </Pressable>
+            </View>
           </View>
 
           <View className="gap-xs mt-2xl">
@@ -490,18 +514,6 @@ export default function ProfileScreen() {
             )}
           </View>
 
-          <View className="flex-row gap-lg mt-2xl">
-            <Pressable onPress={() => router.push('/sign-in')} hitSlop={8}>
-              <Text className="text-label font-sans-medium text-accent dark:text-accent-dark">
-                Account & sign-in →
-              </Text>
-            </Pressable>
-            <Pressable onPress={() => signOut()} hitSlop={8}>
-              <Text className="text-label font-sans-medium text-ink-muted dark:text-ink-muted-dark">
-                Sign out
-              </Text>
-            </Pressable>
-          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

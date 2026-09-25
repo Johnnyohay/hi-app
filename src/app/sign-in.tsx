@@ -63,9 +63,6 @@ export default function SignInScreen() {
       <ScrollView contentContainerClassName="items-center px-lg pt-4xl pb-4xl">
         <View className="w-full" style={{ maxWidth: SIGN_IN_MAX_WIDTH }}>
           <Text className="text-display font-serif-semibold text-ink dark:text-ink-dark">Hi</Text>
-          <Text className="text-label font-sans-medium text-accent dark:text-accent-dark mt-xs">
-            True connections, fast and easy
-          </Text>
           <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark mt-sm">
             No long posts, no redundant pictures. Create meaningful connections for connecting.
           </Text>

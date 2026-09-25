@@ -1,4 +1,5 @@
 import type { Session } from '@supabase/supabase-js';
+import { router } from 'expo-router';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
 import { oauthProviders, signInWithProvider as startOAuth, type OAuthProviderId } from '@/lib/oauth';
@@ -63,6 +64,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signOut() {
     if (!isSupabaseConfigured) return;
     await supabase.auth.signOut();
+    router.replace('/sign-in');
   }
 
   return (

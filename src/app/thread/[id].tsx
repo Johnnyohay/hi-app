@@ -1,6 +1,6 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
@@ -30,6 +30,11 @@ export default function ThreadScreen() {
         <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
           Sign in to view this thread.
         </Text>
+        <Pressable onPress={() => router.replace('/sign-in')} hitSlop={8} className="mt-lg">
+          <Text className="text-label font-sans-medium text-accent dark:text-accent-dark">
+            Sign in →
+          </Text>
+        </Pressable>
       </SafeAreaView>
     );
   }

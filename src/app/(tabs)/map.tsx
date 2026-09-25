@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, ScrollView, Text, View, useColorScheme } 
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
+import { BrandHeader } from '@/components/brand-header';
 import { ContentMaxWidth, ListPaneWidth } from '@/constants/theme';
 import { colorTokens } from '@/constants/tokens';
 import { useAuth } from '@/lib/auth-context';
@@ -216,6 +217,11 @@ export default function MapScreen() {
         <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
           Sign in to see the map.
         </Text>
+        <Pressable onPress={() => router.replace('/sign-in')} hitSlop={8} className="mt-lg">
+          <Text className="text-label font-sans-medium text-accent dark:text-accent-dark">
+            Sign in →
+          </Text>
+        </Pressable>
       </SafeAreaView>
     );
   }
@@ -240,6 +246,7 @@ export default function MapScreen() {
   if (isWide) {
     return (
       <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={['left', 'right']}>
+        <BrandHeader />
         <View className="flex-1 items-center">
           <View className="flex-1 flex-row w-full" style={{ maxWidth: ContentMaxWidth }}>
             <View className="flex-1">
@@ -269,6 +276,7 @@ export default function MapScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-background dark:bg-background-dark" edges={['top', 'left', 'right']}>
+      <BrandHeader />
       <ScrollView contentContainerClassName="pb-2xl">
         <MapHeader network={network} />
         <View className="px-lg">
