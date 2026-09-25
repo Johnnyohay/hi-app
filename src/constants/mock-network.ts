@@ -78,3 +78,23 @@ export const feedbackTags: FeedbackTag[] = [
   { id: 'didnt_feel_substantial', label: "Didn't feel substantial" },
   { id: 'unresponsive', label: 'Unresponsive' },
 ];
+
+export type ReportReasonId =
+  | 'harassment'
+  | 'spam'
+  | 'fake_profile'
+  | 'inappropriate_content'
+  | 'safety_concern'
+  | 'other';
+
+export type ReportReason = { id: ReportReasonId; label: string };
+
+/** Reports are only ever visible to the reporter and, via the dashboard, the app operator — never to the person reported. */
+export const reportReasons: ReportReason[] = [
+  { id: 'harassment', label: 'Harassment or threats' },
+  { id: 'spam', label: 'Spam or unsolicited advertising' },
+  { id: 'fake_profile', label: 'Fake or impersonating profile' },
+  { id: 'inappropriate_content', label: 'Inappropriate content' },
+  { id: 'safety_concern', label: 'Safety concern' },
+  { id: 'other', label: 'Something else' },
+];

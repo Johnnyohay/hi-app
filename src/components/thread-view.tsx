@@ -2,13 +2,23 @@ import { useEffect, useState } from 'react';
 import { ActivityIndicator, KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, TextInput, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
-import { feedbackTags, randomPlayfulNudge, type FeedbackTagId } from '@/constants/mock-network';
 import {
+  feedbackTags,
+  randomPlayfulNudge,
+  reportReasons,
+  type FeedbackTagId,
+  type ReportReasonId,
+} from '@/constants/mock-network';
+import {
+  blockUser,
   fetchMyRatingFor,
   fetchThread,
+  fileReport,
   helpRequestMessage,
+  isBlocked,
   rateProfile,
   sendMessage,
+  unblockUser,
   type Message,
   type Profile,
   type Rating,
@@ -133,6 +143,138 @@ function RatingPanel({ person, myUserId }: { person: Profile; myUserId: string }
   );
 }
 
+function BlockControl({
+  person,
+  myUserId,
+  blocked,
+  onChange,
+}: {
+  person: Profile;
+  myUserId: string;
+  blocked: boolean | undefined;
+  onChange: (blocked: boolean) => void;
+}) {
+  const [working, setWorking] = useState(false);
+
+  async function toggle() {
+    setWorking(true);
+    try {
+      if (blocked) {
+        await unblockUser(myUserId, person.id);
+        onChange(false);
+      } else {
+        await blockUser(myUserId, person.id);
+        onChange(true);
+      }
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  if (blocked === undefined) return null;
+
+  return (
+    <Pressable onPress={toggle} disabled={working} hitSlop={8}>
+      <Text className="text-caption font-sans-medium text-ink-muted dark:text-ink-muted-dark">
+        {working ? '…' : blocked ? `Unblock ${person.name}` : `Block ${person.name}`}
+      </Text>
+    </Pressable>
+  );
+}
+
+function ReportPanel({ person, myUserId }: { person: Profile; myUserId: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const [reason, setReason] = useState<ReportReasonId | null>(null);
+  const [details, setDetails] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  async function submit() {
+    if (!reason) return;
+    setSubmitting(true);
+    try {
+      await fileReport(myUserId, person.id, reason, details.trim());
+      setSubmitted(true);
+      setExpanded(false);
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (submitted) {
+    return (
+      <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
+        Reported — thanks, we&apos;ll review it.
+      </Text>
+    );
+  }
+
+  if (!expanded) {
+    return (
+      <Pressable onPress={() => setExpanded(true)} hitSlop={8}>
+        <Text className="text-caption font-sans-medium text-ink-muted dark:text-ink-muted-dark">
+          Report {person.name}
+        </Text>
+      </Pressable>
+    );
+  }
+
+  return (
+    <View className="gap-sm">
+      <Text className="text-caption font-sans-medium text-ink-muted dark:text-ink-muted-dark uppercase">
+        Report {person.name}
+      </Text>
+      <View className="flex-row flex-wrap gap-xs">
+        {reportReasons.map((option) => (
+          <Pressable
+            key={option.id}
+            onPress={() => setReason(option.id)}
+            className={`rounded-sm border px-md py-xs ${
+              reason === option.id
+                ? 'border-accent dark:border-accent-dark bg-accent dark:bg-accent-dark'
+                : 'border-hairline dark:border-hairline-dark'
+            }`}>
+            <Text
+              className={`text-caption font-sans-medium ${
+                reason === option.id
+                  ? 'text-background dark:text-background-dark'
+                  : 'text-ink-muted dark:text-ink-muted-dark'
+              }`}>
+              {option.label}
+            </Text>
+          </Pressable>
+        ))}
+      </View>
+      <TextInput
+        className="text-caption font-sans text-ink dark:text-ink-dark border border-hairline dark:border-hairline-dark rounded-sm px-md py-sm"
+        style={{ minHeight: 60, outlineWidth: 0 }}
+        value={details}
+        onChangeText={setDetails}
+        placeholder="Anything else that would help us look into this (optional)"
+        multiline
+      />
+      <View className="flex-row gap-lg">
+        <Pressable onPress={submit} disabled={!reason || submitting} hitSlop={8}>
+          {submitting ? (
+            <ActivityIndicator size="small" />
+          ) : (
+            <Text
+              className="text-label font-sans-medium text-accent dark:text-accent-dark"
+              style={{ opacity: reason ? 1 : 0.35 }}>
+              Submit report
+            </Text>
+          )}
+        </Pressable>
+        <Pressable onPress={() => setExpanded(false)} hitSlop={8}>
+          <Text className="text-label font-sans-medium text-ink-muted dark:text-ink-muted-dark">
+            Cancel
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
 export function ThreadView({
   person,
   myUserId,
@@ -146,11 +288,15 @@ export function ThreadView({
 }) {
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [reply, setReply] = useState(initialReply);
+  const [blocked, setBlocked] = useState<boolean | undefined>(undefined);
 
   useEffect(() => {
     let cancelled = false;
     fetchThread(myUserId, person.id).then((rows) => {
       if (!cancelled) setMessages(rows);
+    });
+    isBlocked(myUserId, person.id).then((value) => {
+      if (!cancelled) setBlocked(value);
     });
     return () => {
       cancelled = true;
@@ -195,6 +341,11 @@ export function ThreadView({
 
       <RatingPanel person={person} myUserId={myUserId} />
 
+      <View className="gap-sm px-lg py-sm border-b border-hairline dark:border-hairline-dark">
+        <BlockControl person={person} myUserId={myUserId} blocked={blocked} onChange={setBlocked} />
+        <ReportPanel person={person} myUserId={myUserId} />
+      </View>
+
       {messages === null ? (
         <View className="flex-1 items-center justify-center">
           <ActivityIndicator />
@@ -222,29 +373,39 @@ export function ThreadView({
         </ScrollView>
       )}
 
-      <View className="flex-row gap-sm px-lg pb-sm">
-        <QuickAction label="👋 Send a nudge" onPress={sendNudge} />
-        <QuickAction label="🙏 Ask for help" onPress={fillHelpRequest} />
-      </View>
-
-      <View className="flex-row gap-sm items-end px-lg pb-lg pt-sm border-t border-hairline dark:border-hairline-dark">
-        <TextInput
-          className="flex-1 text-body font-sans text-ink dark:text-ink-dark"
-          style={{ minHeight: 44, maxHeight: 120, outlineWidth: 0 }}
-          value={reply}
-          onChangeText={setReply}
-          placeholder="Reply"
-          multiline
-        />
-        <Pressable
-          onPress={sendReply}
-          className="rounded-sm px-lg bg-accent dark:bg-accent-dark items-center justify-center"
-          style={{ minHeight: 44 }}>
-          <Text className="text-label font-sans-medium text-background dark:text-background-dark">
-            Send
+      {blocked ? (
+        <View className="px-lg py-lg border-t border-hairline dark:border-hairline-dark">
+          <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
+            You&apos;ve blocked {person.name}. Unblock them above to send a message again.
           </Text>
-        </Pressable>
-      </View>
+        </View>
+      ) : (
+        <>
+          <View className="flex-row gap-sm px-lg pb-sm">
+            <QuickAction label="👋 Send a nudge" onPress={sendNudge} />
+            <QuickAction label="🙏 Ask for help" onPress={fillHelpRequest} />
+          </View>
+
+          <View className="flex-row gap-sm items-end px-lg pb-lg pt-sm border-t border-hairline dark:border-hairline-dark">
+            <TextInput
+              className="flex-1 text-body font-sans text-ink dark:text-ink-dark"
+              style={{ minHeight: 44, maxHeight: 120, outlineWidth: 0 }}
+              value={reply}
+              onChangeText={setReply}
+              placeholder="Reply"
+              multiline
+            />
+            <Pressable
+              onPress={sendReply}
+              className="rounded-sm px-lg bg-accent dark:bg-accent-dark items-center justify-center"
+              style={{ minHeight: 44 }}>
+              <Text className="text-label font-sans-medium text-background dark:text-background-dark">
+                Send
+              </Text>
+            </Pressable>
+          </View>
+        </>
+      )}
     </KeyboardAvoidingView>
   );
 }

@@ -18,6 +18,7 @@ export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [status, setStatus] = useState<{ kind: 'idle' | 'sent' | 'error'; message?: string }>({
     kind: 'idle',
   });
@@ -36,7 +37,7 @@ export default function SignInScreen() {
     const trimmed = email.trim();
     const trimmedName = name.trim();
     if (!trimmed || !password) return;
-    if (mode === 'signup' && !trimmedName) return;
+    if (mode === 'signup' && (!trimmedName || !agreedToTerms)) return;
 
     const { error } =
       mode === 'signin'
@@ -60,7 +61,7 @@ export default function SignInScreen() {
   const canSubmit =
     email.trim().length > 0 &&
     password.length > 0 &&
-    (mode === 'signin' || name.trim().length > 0);
+    (mode === 'signin' || (name.trim().length > 0 && agreedToTerms));
 
   return (
     <SafeAreaView
@@ -192,21 +193,43 @@ export default function SignInScreen() {
           </Pressable>
 
           {mode === 'signup' && (
-            <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark mt-md">
-              By creating an account you agree to our{' '}
-              <Text
-                className="text-accent dark:text-accent-dark"
-                onPress={() => router.push('/terms-of-service')}>
-                Terms
-              </Text>{' '}
-              and{' '}
-              <Text
-                className="text-accent dark:text-accent-dark"
-                onPress={() => router.push('/privacy-policy')}>
-                Privacy Policy
+            <Pressable
+              onPress={() => setAgreedToTerms((value) => !value)}
+              className="flex-row items-start gap-sm mt-md"
+              hitSlop={8}>
+              <View
+                className="items-center justify-center border rounded-sm"
+                style={{
+                  width: 20,
+                  height: 20,
+                  marginTop: 1,
+                  borderColor: placeholderColor,
+                }}>
+                {agreedToTerms && (
+                  <View className="w-full h-full items-center justify-center rounded-sm bg-accent dark:bg-accent-dark">
+                    <Text className="text-label font-sans-medium text-background dark:text-background-dark">
+                      ✓
+                    </Text>
+                  </View>
+                )}
+              </View>
+              <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark flex-1">
+                I agree to the{' '}
+                <Text
+                  className="text-accent dark:text-accent-dark"
+                  onPress={() => router.push('/terms-of-service')}>
+                  Terms
+                </Text>{' '}
+                and{' '}
+                <Text
+                  className="text-accent dark:text-accent-dark"
+                  onPress={() => router.push('/privacy-policy')}>
+                  Privacy Policy
+                </Text>
+                , and I understand Hi doesn&apos;t verify who I&apos;m talking to — I&apos;ll use
+                ordinary caution, like meeting in public, before meeting anyone in person.
               </Text>
-              .
-            </Text>
+            </Pressable>
           )}
 
           {status.kind === 'sent' && (

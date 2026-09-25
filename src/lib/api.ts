@@ -1,4 +1,9 @@
-import { askCategories, type AskCategoryId, type FeedbackTagId } from '@/constants/mock-network';
+import {
+  askCategories,
+  type AskCategoryId,
+  type FeedbackTagId,
+  type ReportReasonId,
+} from '@/constants/mock-network';
 import type { Database } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 
@@ -6,6 +11,7 @@ type ProfileRow = Database['public']['Tables']['profiles']['Row'];
 type MessageRow = Database['public']['Tables']['messages']['Row'];
 type AskRow = Database['public']['Tables']['asks']['Row'];
 type RatingRow = Database['public']['Tables']['ratings']['Row'];
+type ReportRow = Database['public']['Tables']['reports']['Row'];
 
 export type Profile = Omit<ProfileRow, 'social_links'> & {
   social_links: Record<string, string>;
@@ -18,6 +24,8 @@ export type Message = Omit<MessageRow, 'kind'> & {
 export type Ask = Omit<AskRow, 'category'> & { category: AskCategoryId };
 
 export type Rating = Omit<RatingRow, 'feedback_tag'> & { feedback_tag: FeedbackTagId | null };
+
+export type Report = Omit<ReportRow, 'reason'> & { reason: ReportReasonId };
 
 export async function fetchMyProfile(userId: string): Promise<Profile | null> {
   const { data, error } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle();
@@ -53,10 +61,58 @@ export async function updateMyProfile(userId: string, updates: Partial<Profile>)
 }
 
 /** Everyone else in the directory. */
-export async function fetchNetwork(excludeUserId: string): Promise<Profile[]> {
-  const { data, error } = await supabase.from('profiles').select('*').neq('id', excludeUserId).order('name');
+/** Everyone excludeUserId has blocked — used to keep blocked people out of the directory automatically. */
+async function fetchBlockedIds(userId: string): Promise<string[]> {
+  const { data, error } = await supabase.from('blocks').select('blocked_id').eq('blocker_id', userId);
   if (error) throw error;
-  return data as Profile[];
+  return (data ?? []).map((row) => row.blocked_id);
+}
+
+export async function fetchNetwork(excludeUserId: string): Promise<Profile[]> {
+  const [{ data, error }, blockedIds] = await Promise.all([
+    supabase.from('profiles').select('*').neq('id', excludeUserId).order('name'),
+    fetchBlockedIds(excludeUserId),
+  ]);
+  if (error) throw error;
+  const blocked = new Set(blockedIds);
+  return (data as Profile[]).filter((person) => !blocked.has(person.id));
+}
+
+export async function isBlocked(blockerId: string, blockedId: string): Promise<boolean> {
+  const { data, error } = await supabase
+    .from('blocks')
+    .select('id')
+    .eq('blocker_id', blockerId)
+    .eq('blocked_id', blockedId)
+    .maybeSingle();
+  if (error) throw error;
+  return data !== null;
+}
+
+export async function blockUser(blockerId: string, blockedId: string): Promise<void> {
+  const { error } = await supabase.from('blocks').insert({ blocker_id: blockerId, blocked_id: blockedId });
+  if (error) throw error;
+}
+
+export async function unblockUser(blockerId: string, blockedId: string): Promise<void> {
+  const { error } = await supabase
+    .from('blocks')
+    .delete()
+    .eq('blocker_id', blockerId)
+    .eq('blocked_id', blockedId);
+  if (error) throw error;
+}
+
+export async function fileReport(
+  reporterId: string,
+  reportedId: string,
+  reason: ReportReasonId,
+  details: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('reports')
+    .insert({ reporter_id: reporterId, reported_id: reportedId, reason, details });
+  if (error) throw error;
 }
 
 export async function fetchThread(myUserId: string, otherUserId: string): Promise<Message[]> {

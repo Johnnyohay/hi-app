@@ -36,6 +36,19 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"blocks": {
+                  Row: {
+                    "blocked_id": string,"blocker_id": string,"created_at": string,"id": string
+                  }
+                  Insert: {
+                    "blocked_id": string,"blocker_id": string,"created_at"?: string,"id"?: string
+                  }
+                  Update: {
+                    "blocked_id"?: string,"blocker_id"?: string,"created_at"?: string,"id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"messages": {
                   Row: {
                     "body": string,"created_at": string,"from_user_id": string,"id": string,"kind": string,"to_user_id": string
@@ -71,6 +84,19 @@ export type Database = {
                   }
                   Update: {
                     "created_at"?: string,"feedback_tag"?: string | null,"id"?: string,"rated_id"?: string,"rater_id"?: string,"stars"?: number,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"reports": {
+                  Row: {
+                    "created_at": string,"details": string,"id": string,"reason": string,"reported_id": string,"reporter_id": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"details"?: string,"id"?: string,"reason": string,"reported_id": string,"reporter_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"details"?: string,"id"?: string,"reason"?: string,"reported_id"?: string,"reporter_id"?: string
                   }
                   Relationships: [
                     

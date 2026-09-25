@@ -128,27 +128,37 @@ export default function TermsOfServiceScreen() {
             twelve months before the claim.
           </P>
 
-          <H2>9. Indemnification</H2>
+          <H2>9. Dispute resolution</H2>
+          <P>
+            Most concerns can be resolved by contacting us directly — please try that first. For
+            any dispute that can&apos;t be resolved informally, you and Hi agree to resolve it
+            through binding individual arbitration rather than in court, except that either party
+            may bring an individual claim in small claims court instead. You and Hi each waive the
+            right to a jury trial and to participate in a class action, class arbitration, or
+            representative action against the other.
+          </P>
+
+          <H2>10. Indemnification</H2>
           <P>
             You agree to cover any claims, damages, or costs arising from your own violation of
             these terms or misuse of the app.
           </P>
 
-          <H2>10. Termination</H2>
+          <H2>11. Termination</H2>
           <P>
             You can stop using Hi and request account deletion at any time. We can suspend or
             terminate your access for violating these terms or for any other reason, with or
             without notice.
           </P>
 
-          <H2>11. Changes</H2>
+          <H2>12. Changes</H2>
           <P>
             We may update these terms as the app changes. If we do, we&apos;ll update the date at the
             top of this page; continuing to use Hi after a change means you accept the updated
             terms.
           </P>
 
-          <H2>12. Contact</H2>
+          <H2>13. Contact</H2>
           <P>
             Questions about these terms can be sent via{' '}
             <Text className="text-accent dark:text-accent-dark">
