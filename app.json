@@ -52,7 +52,8 @@
         {
           "locationWhenInUsePermission": "Hi uses your location to place your pin on the network map. This is optional and only used when you choose to set it."
         }
-      ]
+      ],
+      "@sentry/react-native"
     ],
     "experiments": {
       "typedRoutes": true,
