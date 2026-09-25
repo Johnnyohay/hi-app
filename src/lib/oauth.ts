@@ -47,11 +47,12 @@ export async function signInWithProvider(
   const result = await WebBrowser.openAuthSessionAsync(data.url, redirectTo);
   if (result.type !== 'success' || !result.url) return { error: null };
 
-  const params = new URLSearchParams(result.url.split('#')[1] ?? '');
-  const access_token = params.get('access_token');
-  const refresh_token = params.get('refresh_token');
-  if (!access_token || !refresh_token) return { error: 'Sign-in did not complete.' };
+  // PKCE (the client's flowType — see lib/supabase.ts) returns an authorization
+  // code as a query param, not tokens in the URL fragment, so it has to be
+  // exchanged for a session rather than handed straight to setSession.
+  const code = new URL(result.url).searchParams.get('code');
+  if (!code) return { error: 'Sign-in did not complete.' };
 
-  const { error: sessionError } = await supabase.auth.setSession({ access_token, refresh_token });
+  const { error: sessionError } = await supabase.auth.exchangeCodeForSession(code);
   return { error: sessionError?.message ?? null };
 }

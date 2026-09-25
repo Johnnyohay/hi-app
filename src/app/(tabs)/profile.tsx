@@ -1,3 +1,5 @@
+import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
@@ -13,10 +15,23 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
+import { askCategories, feedbackTags } from '@/constants/mock-network';
 import { socialPlatforms, socialUrl, type SocialPlatform } from '@/constants/me';
 import { colorTokens } from '@/constants/tokens';
 import { useAuth } from '@/lib/auth-context';
-import { fetchMyProfile, updateMyProfile, type Profile } from '@/lib/api';
+import {
+  fetchMyAsks,
+  fetchMyProfile,
+  fetchMyReceivedRatings,
+  fetchNetwork,
+  fetchNetworkAsks,
+  matchAsksForMyOffer,
+  updateMyProfile,
+  uploadAvatar,
+  type Ask,
+  type Profile,
+  type Rating,
+} from '@/lib/api';
 
 const PROFILE_MAX_WIDTH = 800;
 
@@ -34,14 +49,29 @@ export default function ProfileScreen() {
   const [editing, setEditing] = useState(false);
   const [newSkill, setNewSkill] = useState('');
   const [saving, setSaving] = useState(false);
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [locating, setLocating] = useState(false);
+  const [myAsks, setMyAsks] = useState<Ask[] | null>(null);
+  const [interested, setInterested] = useState<{ ask: Ask; person: Profile }[] | null>(null);
+  const [myRatings, setMyRatings] = useState<Rating[] | null>(null);
   const scheme = useColorScheme();
   const placeholderColor = colorTokens[scheme === 'dark' ? 'dark' : 'light'].inkMuted;
 
   useEffect(() => {
     if (!session) return;
     let cancelled = false;
-    fetchMyProfile(session.user.id).then((row) => {
-      if (!cancelled) setMe(row);
+    Promise.all([
+      fetchMyProfile(session.user.id),
+      fetchMyAsks(session.user.id),
+      fetchNetwork(session.user.id),
+      fetchNetworkAsks(session.user.id),
+      fetchMyReceivedRatings(session.user.id),
+    ]).then(([profile, asks, network, networkAsks, ratings]) => {
+      if (cancelled) return;
+      setMe(profile);
+      setMyAsks(asks);
+      setMyRatings(ratings);
+      if (profile) setInterested(matchAsksForMyOffer(profile, networkAsks, network));
     });
     return () => {
       cancelled = true;
@@ -59,6 +89,57 @@ export default function ProfileScreen() {
     setNewSkill('');
   }
 
+  async function pickAndUploadPhoto() {
+    if (!session) return;
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) return;
+
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      quality: 0.8,
+      allowsEditing: true,
+      aspect: [1, 1],
+    });
+    if (result.canceled || !result.assets[0]) return;
+
+    setUploadingPhoto(true);
+    try {
+      const asset = result.assets[0];
+      const photoUrl = await uploadAvatar(session.user.id, asset.uri, asset.mimeType ?? 'image/jpeg');
+      const saved = await updateMyProfile(session.user.id, { photo_url: photoUrl });
+      setMe(saved);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
+
+  async function removePhoto() {
+    if (!session) return;
+    setUploadingPhoto(true);
+    try {
+      const saved = await updateMyProfile(session.user.id, { photo_url: null });
+      setMe(saved);
+    } finally {
+      setUploadingPhoto(false);
+    }
+  }
+
+  async function useCurrentLocation() {
+    const permission = await Location.requestForegroundPermissionsAsync();
+    if (!permission.granted) return;
+
+    setLocating(true);
+    try {
+      const position = await Location.getCurrentPositionAsync({});
+      setMe(
+        (current) =>
+          current && { ...current, lat: position.coords.latitude, lng: position.coords.longitude }
+      );
+    } finally {
+      setLocating(false);
+    }
+  }
+
   function updateSocial(platform: SocialPlatform, handle: string) {
     setMe((current) => current && { ...current, social_links: { ...current.social_links, [platform]: handle } });
   }
@@ -74,6 +155,8 @@ export default function ProfileScreen() {
           skills: me.skills,
           current_ask: me.current_ask,
           social_links: me.social_links,
+          lat: me.lat,
+          lng: me.lng,
         });
         setMe(saved);
       } finally {
@@ -113,7 +196,27 @@ export default function ProfileScreen() {
         <View className="w-full px-lg pt-2xl" style={{ maxWidth: PROFILE_MAX_WIDTH }}>
           <View className="flex-row items-start justify-between">
             <View className="flex-row gap-lg items-center flex-1">
-              <Avatar name={me.name} seed={me.id} size={104} />
+              <View className="gap-xs items-center">
+                <Avatar name={me.name} seed={me.id} size={104} photoUrl={me.photo_url} />
+                {editing && (
+                  <Pressable onPress={pickAndUploadPhoto} disabled={uploadingPhoto} hitSlop={8}>
+                    {uploadingPhoto ? (
+                      <ActivityIndicator />
+                    ) : (
+                      <Text className="text-caption font-sans-medium text-accent dark:text-accent-dark">
+                        {me.photo_url ? 'Change photo' : 'Add photo'}
+                      </Text>
+                    )}
+                  </Pressable>
+                )}
+                {editing && me.photo_url && !uploadingPhoto && (
+                  <Pressable onPress={removePhoto} hitSlop={8}>
+                    <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
+                      Remove
+                    </Text>
+                  </Pressable>
+                )}
+              </View>
               <View className="flex-1 gap-xs">
                 {editing ? (
                   <TextInput
@@ -131,14 +234,25 @@ export default function ProfileScreen() {
                   {me.role}
                 </Text>
                 {editing ? (
-                  <TextInput
-                    className="text-caption font-sans text-ink dark:text-ink-dark"
-                    style={{ outlineWidth: 0 }}
-                    value={me.city}
-                    onChangeText={(city) => setMe((current) => current && { ...current, city })}
-                    placeholder="City"
-                    placeholderTextColor={placeholderColor}
-                  />
+                  <View className="gap-xs">
+                    <TextInput
+                      className="text-caption font-sans text-ink dark:text-ink-dark"
+                      style={{ outlineWidth: 0 }}
+                      value={me.city}
+                      onChangeText={(city) => setMe((current) => current && { ...current, city })}
+                      placeholder="City"
+                      placeholderTextColor={placeholderColor}
+                    />
+                    <Pressable onPress={useCurrentLocation} disabled={locating} hitSlop={8}>
+                      {locating ? (
+                        <ActivityIndicator size="small" />
+                      ) : (
+                        <Text className="text-caption font-sans-medium text-accent dark:text-accent-dark">
+                          {me.lat != null ? 'Update pin on map' : 'Use current location for map'}
+                        </Text>
+                      )}
+                    </Pressable>
+                  </View>
                 ) : (
                   <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
                     {me.city || 'Add your city'}
@@ -281,6 +395,99 @@ export default function ProfileScreen() {
                 );
               })}
             </View>
+          </View>
+
+          <View className="gap-sm mt-2xl">
+            <SectionLabel>My requests</SectionLabel>
+            {myAsks === null ? (
+              <ActivityIndicator className="mt-sm" />
+            ) : myAsks.length === 0 ? (
+              <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark mt-xs">
+                You haven&apos;t asked your network for anything yet.
+              </Text>
+            ) : (
+              <View className="gap-sm mt-xs">
+                {myAsks.map((ask) => (
+                  <View
+                    key={ask.id}
+                    className="rounded-sm border border-hairline dark:border-hairline-dark px-lg py-md gap-xs">
+                    <Text className="text-caption font-sans-medium text-ink-muted dark:text-ink-muted-dark uppercase">
+                      {askCategories.find((entry) => entry.id === ask.category)?.label ?? ask.category}
+                    </Text>
+                    <Text className="text-body font-sans text-ink dark:text-ink-dark">{ask.need_text}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+
+          <View className="gap-sm mt-2xl">
+            <SectionLabel>Feedback you&apos;ve received</SectionLabel>
+            {myRatings === null ? (
+              <ActivityIndicator className="mt-sm" />
+            ) : myRatings.length === 0 ? (
+              <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark mt-xs">
+                Nobody&apos;s rated you yet.
+              </Text>
+            ) : (
+              <View className="gap-xs mt-xs">
+                <Text className="text-title font-serif-medium text-ink dark:text-ink-dark">
+                  {'★'.repeat(
+                    Math.round(myRatings.reduce((total, r) => total + r.stars, 0) / myRatings.length)
+                  )}{' '}
+                  <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
+                    ({myRatings.length} rating{myRatings.length === 1 ? '' : 's'})
+                  </Text>
+                </Text>
+                <View className="flex-row flex-wrap gap-sm mt-xs">
+                  {feedbackTags
+                    .map((tag) => ({
+                      tag,
+                      count: myRatings.filter((r) => r.feedback_tag === tag.id).length,
+                    }))
+                    .filter((entry) => entry.count > 0)
+                    .map(({ tag, count }) => (
+                      <View
+                        key={tag.id}
+                        className="rounded-sm border border-hairline dark:border-hairline-dark px-md py-xs">
+                        <Text className="text-label font-sans-medium text-ink dark:text-ink-dark">
+                          {tag.label} · {count}
+                        </Text>
+                      </View>
+                    ))}
+                </View>
+              </View>
+            )}
+          </View>
+
+          <View className="gap-sm mt-2xl">
+            <SectionLabel>People who might want my help</SectionLabel>
+            {interested === null ? (
+              <ActivityIndicator className="mt-sm" />
+            ) : interested.length === 0 ? (
+              <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark mt-xs">
+                Nobody&apos;s asked for something matching what you offer yet.
+              </Text>
+            ) : (
+              <View className="gap-sm mt-xs">
+                {interested.map(({ ask, person }) => (
+                  <Pressable
+                    key={ask.id}
+                    onPress={() => router.push({ pathname: '/thread/[id]', params: { id: person.id } })}
+                    className="flex-row gap-md items-center rounded-sm border border-hairline dark:border-hairline-dark px-lg py-md active:opacity-60">
+                    <Avatar name={person.name} seed={person.id} size={40} photoUrl={person.photo_url} />
+                    <View className="flex-1 gap-xs">
+                      <Text className="text-label font-sans-medium text-ink dark:text-ink-dark">
+                        {person.name}
+                      </Text>
+                      <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
+                        {ask.need_text}
+                      </Text>
+                    </View>
+                  </Pressable>
+                ))}
+              </View>
+            )}
           </View>
 
           <View className="flex-row gap-lg mt-2xl">

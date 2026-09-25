@@ -1,4 +1,4 @@
-import { Text, View, useColorScheme } from 'react-native';
+import { Image, Text, View, useColorScheme } from 'react-native';
 
 import { colorTokens } from '@/constants/tokens';
 
@@ -19,10 +19,29 @@ function hashToVariant(seed: string): 'ink' | 'accent' {
   return Math.abs(hash) % 2 === 0 ? 'ink' : 'accent';
 }
 
-export function Avatar({ name, seed, size }: { name: string; seed: string; size: number }) {
+export function Avatar({
+  name,
+  seed,
+  size,
+  photoUrl,
+}: {
+  name: string;
+  seed: string;
+  size: number;
+  photoUrl?: string | null;
+}) {
   const scheme = useColorScheme();
   const colors = colorTokens[scheme === 'dark' ? 'dark' : 'light'];
   const variant = hashToVariant(seed);
+
+  if (photoUrl) {
+    return (
+      <Image
+        source={{ uri: photoUrl }}
+        style={{ width: size, height: size, borderRadius: 4 }}
+      />
+    );
+  }
 
   return (
     <View

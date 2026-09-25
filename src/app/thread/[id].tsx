@@ -48,7 +48,7 @@ export default function ThreadScreen() {
         options={{
           headerTitle: () => (
             <View className="flex-row items-center gap-sm">
-              <Avatar name={person.name} seed={person.id} size={32} />
+              <Avatar name={person.name} seed={person.id} size={32} photoUrl={person.photo_url} />
               <Text className="text-title font-serif-medium text-ink dark:text-ink-dark">
                 {person.name}
               </Text>

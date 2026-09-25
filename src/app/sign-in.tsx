@@ -63,8 +63,11 @@ export default function SignInScreen() {
       <ScrollView contentContainerClassName="items-center px-lg pt-4xl pb-4xl">
         <View className="w-full" style={{ maxWidth: SIGN_IN_MAX_WIDTH }}>
           <Text className="text-display font-serif-semibold text-ink dark:text-ink-dark">Hi</Text>
+          <Text className="text-label font-sans-medium text-accent dark:text-accent-dark mt-xs">
+            True connections, fast and easy
+          </Text>
           <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark mt-sm">
-            Ask people you actually know, directly. No feed, no broker, no anonymous accounts.
+            No long posts, no redundant pictures. Create meaningful connections for connecting.
           </Text>
 
           {!isSupabaseConfigured && (
@@ -169,9 +172,9 @@ export default function SignInScreen() {
           </Pressable>
 
           {status.kind === 'sent' && (
-            <Text className="text-body font-sans text-ink dark:text-ink-dark mt-lg">
-              {status.message}
-            </Text>
+            <View className="mt-lg rounded-sm border border-hairline dark:border-hairline-dark bg-surface dark:bg-surface-dark px-lg py-lg">
+              <Text className="text-body font-sans text-ink dark:text-ink-dark">{status.message}</Text>
+            </View>
           )}
           {status.kind === 'error' && (
             <Text className="text-body font-sans text-accent dark:text-accent-dark mt-lg">

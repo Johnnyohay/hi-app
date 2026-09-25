@@ -118,7 +118,7 @@ function DetailCard({ person, onMessage }: { person: Profile; onMessage: () => v
   return (
     <View className="gap-md">
       <View className="flex-row gap-md items-center">
-        <Avatar name={person.name} seed={person.id} size={64} />
+        <Avatar name={person.name} seed={person.id} size={64} photoUrl={person.photo_url} />
         <View className="flex-1 gap-xs">
           <Text className="text-title font-serif-medium text-ink dark:text-ink-dark">{person.name}</Text>
           <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
@@ -155,7 +155,7 @@ function MeDetailCard({ me }: { me: Profile }) {
   return (
     <View className="gap-md">
       <View className="flex-row gap-md items-center">
-        <Avatar name={me.name} seed={me.id} size={64} />
+        <Avatar name={me.name} seed={me.id} size={64} photoUrl={me.photo_url} />
         <View className="flex-1 gap-xs">
           <Text className="text-title font-serif-medium text-ink dark:text-ink-dark">
             {me.name} (you)

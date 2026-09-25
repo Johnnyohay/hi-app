@@ -60,3 +60,21 @@ const PLAYFUL_NUDGES = [
 export function randomPlayfulNudge(): string {
   return PLAYFUL_NUDGES[Math.floor(Math.random() * PLAYFUL_NUDGES.length)];
 }
+
+export type FeedbackTagId =
+  | 'amazing_supportive'
+  | 'nice_approach'
+  | 'quick_helpful'
+  | 'didnt_feel_substantial'
+  | 'unresponsive';
+
+export type FeedbackTag = { id: FeedbackTagId; label: string };
+
+/** Preset feedback options for rating someone — deliberately no free text, so feedback stays constructive. */
+export const feedbackTags: FeedbackTag[] = [
+  { id: 'amazing_supportive', label: 'Amazing, supportive experience' },
+  { id: 'nice_approach', label: 'Nice approach' },
+  { id: 'quick_helpful', label: 'Quick and helpful' },
+  { id: 'didnt_feel_substantial', label: "Didn't feel substantial" },
+  { id: 'unresponsive', label: 'Unresponsive' },
+];

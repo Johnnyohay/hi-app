@@ -114,6 +114,11 @@ export default function AskScreen() {
                   Edit ask
                 </Text>
               </Pressable>
+              <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark mt-sm">
+                Matching works by comparing keywords in what you wrote (plus the category) against
+                what each person in your network offers, their skills, role, and city — it&apos;s a
+                keyword search, not AI, so specific words help.
+              </Text>
             </View>
 
             {matches.length > 0 ? (
@@ -133,7 +138,8 @@ export default function AskScreen() {
             ) : (
               <View className="px-lg pt-lg">
                 <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
-                  Nobody in your network matches this yet. We’ll notify you if that changes.
+                  Thanks for listing your request — we&apos;ll surface people from your network as
+                  soon as there&apos;s a match.
                 </Text>
               </View>
             )}

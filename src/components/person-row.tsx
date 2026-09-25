@@ -18,7 +18,7 @@ export function PersonRow({
       className={`flex-row gap-md px-lg py-lg border-b border-hairline dark:border-hairline-dark active:opacity-60 ${
         selected ? 'bg-surface dark:bg-surface-dark' : ''
       }`}>
-      <Avatar name={person.name} seed={person.id} size={72} />
+      <Avatar name={person.name} seed={person.id} size={72} photoUrl={person.photo_url} />
       <View className="flex-1 gap-xs">
         <View className="flex-row items-baseline justify-between">
           <Text className="text-title font-serif-medium text-ink dark:text-ink-dark">
