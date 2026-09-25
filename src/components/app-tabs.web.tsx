@@ -1,11 +1,10 @@
+import { router } from 'expo-router';
 import { Tabs, TabList, TabTrigger, TabSlot, TabTriggerSlotProps, TabListProps } from 'expo-router/ui';
-import { useState } from 'react';
-import { createPortal } from 'react-dom';
 import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
 
 import { ThemedText } from './themed-text';
 
-import { Colors, ContentMaxWidth, Spacing, type ThemeColor } from '@/constants/theme';
+import { Colors, ContentMaxWidth, Spacing } from '@/constants/theme';
 
 export default function AppTabs() {
   return (
@@ -50,53 +49,9 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
   );
 }
 
-function AboutPanel({ colors, onClose }: { colors: Record<ThemeColor, string>; onClose: () => void }) {
-  const content = (
-    <View style={styles.overlay}>
-      <Pressable style={styles.backdrop} onPress={onClose} />
-      <View
-        style={[
-          styles.aboutCard,
-          { backgroundColor: colors.surface, borderColor: colors.hairline },
-        ]}>
-        <View style={styles.aboutHeaderRow}>
-          <ThemedText type="title">What is Hi</ThemedText>
-          <Pressable onPress={onClose} hitSlop={8}>
-            <ThemedText type="label" themeColor="inkMuted">
-              Close
-            </ThemedText>
-          </Pressable>
-        </View>
-        <ThemedText type="body" themeColor="inkMuted" style={styles.aboutParagraph}>
-          No long posts, no redundant pictures. Hi is for asking people you actually know,
-          directly — no feed, no broker, no anonymous accounts. True connections, fast and easy.
-        </ThemedText>
-
-        <ThemedText type="label" style={styles.aboutSectionTitle}>
-          How matching works
-        </ThemedText>
-        <ThemedText type="body" themeColor="inkMuted" style={styles.aboutParagraph}>
-          When you post an ask, we compare the keywords in what you wrote — plus the category you
-          picked — against what each person in your network offers, their skills, role, and city.
-          It&apos;s a keyword search, not AI, so specific words in your request surface better
-          matches.
-        </ThemedText>
-      </View>
-    </View>
-  );
-
-  // Rendered straight onto <body> via portal rather than relying on
-  // `position: fixed` inside a nested View — that CSS value isn't reliably
-  // supported across React Native Web versions, and a silently-dropped
-  // position turns this into an invisible box trapped inside the toolbar.
-  if (typeof document === 'undefined') return null;
-  return createPortal(content, document.body);
-}
-
 export function CustomTabList(props: TabListProps) {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
-  const [aboutOpen, setAboutOpen] = useState(false);
 
   return (
     <View
@@ -111,7 +66,7 @@ export function CustomTabList(props: TabListProps) {
           <ThemedText type="label" themeColor="inkMuted">
             True connections, fast and easy
           </ThemedText>
-          <Pressable onPress={() => setAboutOpen(true)} hitSlop={8}>
+          <Pressable onPress={() => router.push('/about')} hitSlop={8}>
             <ThemedText type="label" themeColor="accent" style={styles.aboutLink}>
               About
             </ThemedText>
@@ -120,8 +75,6 @@ export function CustomTabList(props: TabListProps) {
 
         <View style={styles.tabsRow}>{props.children}</View>
       </View>
-
-      {aboutOpen && <AboutPanel colors={colors} onClose={() => setAboutOpen(false)} />}
     </View>
   );
 }
@@ -153,40 +106,6 @@ const styles = StyleSheet.create({
   },
   aboutLink: {
     textDecorationLine: 'underline',
-  },
-  overlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    zIndex: 50,
-    alignItems: 'center',
-    justifyContent: 'flex-start',
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0, 0, 0, 0.4)',
-  },
-  aboutCard: {
-    marginTop: 96,
-    width: '100%',
-    maxWidth: 440,
-    borderWidth: 1,
-    borderRadius: 4,
-    padding: Spacing.xl,
-    gap: Spacing.sm,
-  },
-  aboutHeaderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  aboutSectionTitle: {
-    marginTop: Spacing.md,
-  },
-  aboutParagraph: {
-    lineHeight: 20,
   },
   pressed: {
     opacity: 0.6,

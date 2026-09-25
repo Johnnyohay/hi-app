@@ -190,6 +190,24 @@ export default function SignInScreen() {
             </Text>
           </Pressable>
 
+          {mode === 'signup' && (
+            <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark mt-md">
+              By creating an account you agree to our{' '}
+              <Text
+                className="text-accent dark:text-accent-dark"
+                onPress={() => router.push('/terms-of-service')}>
+                Terms
+              </Text>{' '}
+              and{' '}
+              <Text
+                className="text-accent dark:text-accent-dark"
+                onPress={() => router.push('/privacy-policy')}>
+                Privacy Policy
+              </Text>
+              .
+            </Text>
+          )}
+
           {status.kind === 'sent' && (
             <View className="mt-lg rounded-sm border border-hairline dark:border-hairline-dark bg-surface dark:bg-surface-dark px-lg py-lg">
               <Text className="text-body font-sans text-ink dark:text-ink-dark">{status.message}</Text>

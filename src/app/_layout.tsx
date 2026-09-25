@@ -38,6 +38,9 @@ export default function RootLayout() {
         <AnimatedSplashOverlay />
         <Stack initialRouteName="sign-in">
           <Stack.Screen name="sign-in" options={{ headerShown: false }} />
+          <Stack.Screen name="about" options={{ headerShown: false }} />
+          <Stack.Screen name="privacy-policy" options={{ headerShown: false }} />
+          <Stack.Screen name="terms-of-service" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen
             name="thread/[id]"
