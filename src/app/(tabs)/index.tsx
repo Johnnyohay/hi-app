@@ -45,6 +45,8 @@ export default function AskScreen() {
   const [category, setCategory] = useState<AskCategoryId | null>(null);
   const [need, setNeed] = useState('');
   const [submitted, setSubmitted] = useState<{ need: string; category: AskCategoryId } | null>(null);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
   const canSend = need.trim().length > 0;
   const scheme = useColorScheme();
   const placeholderColor = colorTokens[scheme === 'dark' ? 'dark' : 'light'].inkMuted;
@@ -64,10 +66,18 @@ export default function AskScreen() {
   const activeCategory = askCategories.find((entry) => entry.id === category);
   const matches = submitted && network ? matchPeopleForAsk(network, submitted.need, submitted.category) : [];
 
-  function handleSend() {
-    if (!canSend || !category || !session) return;
-    postAsk(session.user.id, category, need.trim());
-    setSubmitted({ need: need.trim(), category });
+  async function handleSend() {
+    if (!canSend || !category || !session || sending) return;
+    setSending(true);
+    setSendError(null);
+    try {
+      await postAsk(session.user.id, category, need.trim());
+      setSubmitted({ need: need.trim(), category });
+    } catch {
+      setSendError("Couldn't send that — try again.");
+    } finally {
+      setSending(false);
+    }
   }
 
   function handleEdit() {
@@ -200,7 +210,10 @@ export default function AskScreen() {
         className="text-body font-sans text-ink dark:text-ink-dark mt-xl"
         style={{ minHeight: 96, outlineWidth: 0 }}
         value={need}
-        onChangeText={setNeed}
+        onChangeText={(value) => {
+          setNeed(value);
+          setSendError(null);
+        }}
         placeholder={activeCategory?.placeholder}
         placeholderTextColor={placeholderColor}
         multiline
@@ -209,13 +222,19 @@ export default function AskScreen() {
         returnKeyType="send"
       />
 
+      {sendError && (
+        <Text className="text-caption font-sans text-accent dark:text-accent-dark mt-sm">
+          {sendError}
+        </Text>
+      )}
+
       {isWide && (
         <Pressable
-          disabled={!canSend || !network}
+          disabled={!canSend || !network || sending}
           onPress={handleSend}
           className="rounded-sm px-2xl py-md items-center self-start mt-xl bg-accent dark:bg-accent-dark"
-          style={{ opacity: canSend && network ? 1 : 0.35, minHeight: 44 }}>
-          {network ? (
+          style={{ opacity: canSend && network && !sending ? 1 : 0.35, minHeight: 44 }}>
+          {network && !sending ? (
             <Text className="text-label font-sans-medium text-background dark:text-background-dark">
               Send
             </Text>
@@ -241,13 +260,17 @@ export default function AskScreen() {
             <View className="flex-1 px-lg pt-2xl">{field}</View>
             <View className="px-lg pb-lg">
               <Pressable
-                disabled={!canSend || !network}
+                disabled={!canSend || !network || sending}
                 onPress={handleSend}
                 className="rounded-sm py-md items-center bg-accent dark:bg-accent-dark"
-                style={{ opacity: canSend && network ? 1 : 0.35, minHeight: 44 }}>
-                <Text className="text-label font-sans-medium text-background dark:text-background-dark">
-                  Send
-                </Text>
+                style={{ opacity: canSend && network && !sending ? 1 : 0.35, minHeight: 44 }}>
+                {sending ? (
+                  <ActivityIndicator />
+                ) : (
+                  <Text className="text-label font-sans-medium text-background dark:text-background-dark">
+                    Send
+                  </Text>
+                )}
               </Pressable>
             </View>
           </>

@@ -123,6 +123,15 @@ file_size_limit = "50MiB"
 # allowed_mime_types = ["image/png", "image/jpeg"]
 # objects_path = "./images"
 
+# Profile photos. Public read (avatars are shown to the whole network), but
+# capped in size and restricted to actual image types — the bucket was
+# previously unrestricted, letting any authenticated user host arbitrary
+# large or non-image files at a permanent public URL.
+[storage.buckets.avatars]
+public = true
+file_size_limit = "5MiB"
+allowed_mime_types = ["image/jpeg", "image/png", "image/webp"]
+
 # Allow connections via S3 compatible clients
 [storage.s3_protocol]
 enabled = true

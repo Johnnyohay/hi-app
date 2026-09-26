@@ -21,6 +21,7 @@ import { socialPlatforms, socialUrl, type SocialPlatform } from '@/constants/me'
 import { colorTokens } from '@/constants/tokens';
 import { useAuth } from '@/lib/auth-context';
 import {
+  deleteAvatarByUrl,
   fetchMyAsks,
   fetchMyProfile,
   fetchMyReceivedRatings,
@@ -103,12 +104,14 @@ export default function ProfileScreen() {
     });
     if (result.canceled || !result.assets[0]) return;
 
+    const previousPhotoUrl = me?.photo_url ?? null;
     setUploadingPhoto(true);
     try {
       const asset = result.assets[0];
       const photoUrl = await uploadAvatar(session.user.id, asset.uri, asset.mimeType ?? 'image/jpeg');
       const saved = await updateMyProfile(session.user.id, { photo_url: photoUrl });
       setMe(saved);
+      if (previousPhotoUrl) await deleteAvatarByUrl(previousPhotoUrl);
     } finally {
       setUploadingPhoto(false);
     }
@@ -116,10 +119,12 @@ export default function ProfileScreen() {
 
   async function removePhoto() {
     if (!session) return;
+    const previousPhotoUrl = me?.photo_url ?? null;
     setUploadingPhoto(true);
     try {
       const saved = await updateMyProfile(session.user.id, { photo_url: null });
       setMe(saved);
+      if (previousPhotoUrl) await deleteAvatarByUrl(previousPhotoUrl);
     } finally {
       setUploadingPhoto(false);
     }

@@ -289,6 +289,7 @@ export function ThreadView({
   const [messages, setMessages] = useState<Message[] | null>(null);
   const [reply, setReply] = useState(initialReply);
   const [blocked, setBlocked] = useState<boolean | undefined>(undefined);
+  const [sendError, setSendError] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -308,14 +309,26 @@ export function ThreadView({
     setMessages((current) => [...(current ?? []), sent]);
   }
 
-  function sendReply() {
-    if (!reply.trim()) return;
-    appendMessage(reply.trim());
+  async function sendReply() {
+    const text = reply.trim();
+    if (!text) return;
     setReply('');
+    setSendError(null);
+    try {
+      await appendMessage(text);
+    } catch {
+      setReply(text);
+      setSendError("Couldn't send that message — try again.");
+    }
   }
 
-  function sendNudge() {
-    appendMessage(randomPlayfulNudge(), 'nudge');
+  async function sendNudge() {
+    setSendError(null);
+    try {
+      await appendMessage(randomPlayfulNudge(), 'nudge');
+    } catch {
+      setSendError("Couldn't send that — try again.");
+    }
   }
 
   function fillHelpRequest() {
@@ -386,12 +399,21 @@ export function ThreadView({
             <QuickAction label="🙏 Ask for help" onPress={fillHelpRequest} />
           </View>
 
+          {sendError && (
+            <Text className="text-caption font-sans text-accent dark:text-accent-dark px-lg">
+              {sendError}
+            </Text>
+          )}
+
           <View className="flex-row gap-sm items-end px-lg pb-lg pt-sm border-t border-hairline dark:border-hairline-dark">
             <TextInput
               className="flex-1 text-body font-sans text-ink dark:text-ink-dark"
               style={{ minHeight: 44, maxHeight: 120, outlineWidth: 0 }}
               value={reply}
-              onChangeText={setReply}
+              onChangeText={(value) => {
+                setReply(value);
+                setSendError(null);
+              }}
               placeholder="Reply"
               multiline
             />

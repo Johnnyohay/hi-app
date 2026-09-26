@@ -49,6 +49,15 @@ export async function uploadAvatar(userId: string, uri: string, contentType: str
   return data.publicUrl;
 }
 
+/** Removes a previous avatar object so replacing/removing a photo doesn't leave it orphaned at a permanent public URL. */
+export async function deleteAvatarByUrl(publicUrl: string): Promise<void> {
+  const marker = '/avatars/';
+  const index = publicUrl.indexOf(marker);
+  if (index === -1) return;
+  const path = publicUrl.slice(index + marker.length);
+  await supabase.storage.from('avatars').remove([path]);
+}
+
 export async function updateMyProfile(userId: string, updates: Partial<Profile>): Promise<Profile> {
   const { data, error } = await supabase
     .from('profiles')
