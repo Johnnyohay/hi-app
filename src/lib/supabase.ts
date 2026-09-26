@@ -25,12 +25,10 @@ export const supabase = createClient(
       autoRefreshToken: true,
       persistSession: true,
       // Web needs this on to pick up the access token Supabase appends to the
-      // URL after a magic-link or OAuth redirect. Native completes OAuth via
-      // a deep link instead, handled manually in lib/oauth.ts.
+      // URL after an email confirmation redirect.
       detectSessionInUrl: Platform.OS === 'web',
-      // PKCE avoids putting access/refresh tokens in a redirect URL, which
-      // implicit flow does — meaningful on native where the redirect is a
-      // deep link another app on-device could in principle intercept.
+      // PKCE protects that same redirect (and any future magic-link/OAuth
+      // flow) from a token riding in a URL a malicious app could intercept.
       flowType: 'pkce',
     },
   }

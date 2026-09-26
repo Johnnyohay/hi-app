@@ -2,18 +2,13 @@ import type { Session } from '@supabase/supabase-js';
 import { router } from 'expo-router';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
-import { oauthProviders, signInWithProvider as startOAuth, type OAuthProviderId } from '@/lib/oauth';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
-
-export { oauthProviders };
-export type { OAuthProviderId };
 
 type AuthContextValue = {
   session: Session | null;
   loading: boolean;
   signInWithPassword: (email: string, password: string) => Promise<{ error: string | null }>;
   signUpWithPassword: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
-  signInWithProvider: (provider: OAuthProviderId) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 };
 
@@ -58,13 +53,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null };
   }
 
-  async function signInWithProvider(provider: OAuthProviderId) {
-    if (!isSupabaseConfigured) {
-      return { error: 'Backend not connected yet. See setup steps.' };
-    }
-    return startOAuth(provider);
-  }
-
   async function signOut() {
     if (!isSupabaseConfigured) return;
     await supabase.auth.signOut();
@@ -78,7 +66,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         signInWithPassword,
         signUpWithPassword,
-        signInWithProvider,
         signOut,
       }}>
       {children}

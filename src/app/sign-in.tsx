@@ -5,14 +5,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colorTokens } from '@/constants/tokens';
 import { isSupabaseConfigured } from '@/lib/supabase';
-import { oauthProviders, useAuth, type OAuthProviderId } from '@/lib/auth-context';
+import { useAuth } from '@/lib/auth-context';
 
 const SIGN_IN_MAX_WIDTH = 560;
 
 type Mode = 'signin' | 'signup';
 
 export default function SignInScreen() {
-  const { session, signInWithPassword, signUpWithPassword, signInWithProvider } = useAuth();
+  const { session, signInWithPassword, signUpWithPassword } = useAuth();
   const [mode, setMode] = useState<Mode>('signin');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -25,8 +25,8 @@ export default function SignInScreen() {
   const scheme = useColorScheme();
   const placeholderColor = colorTokens[scheme === 'dark' ? 'dark' : 'light'].inkMuted;
 
-  // Covers every path that can produce a session — password sign-in,
-  // auto-confirmed sign-up, and OAuth — without special-casing each one.
+  // Covers every path that can produce a session — password sign-in and
+  // auto-confirmed sign-up — without special-casing each one.
   useEffect(() => {
     if (session) {
       router.replace('/(tabs)');
@@ -53,11 +53,6 @@ export default function SignInScreen() {
     }
   }
 
-  async function handleProvider(provider: OAuthProviderId) {
-    const { error } = await signInWithProvider(provider);
-    if (error) setStatus({ kind: 'error', message: error });
-  }
-
   const canSubmit =
     email.trim().length > 0 &&
     password.length > 0 &&
@@ -79,31 +74,10 @@ export default function SignInScreen() {
             <View className="mt-xl rounded-sm border border-hairline dark:border-hairline-dark bg-surface dark:bg-surface-dark px-lg py-lg">
               <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
                 Backend isn&apos;t connected yet. This screen is real and will work as soon as
-                Supabase credentials are added to .env, and each provider below is enabled in the
-                Supabase dashboard.
+                Supabase credentials are added to .env.
               </Text>
             </View>
           )}
-
-          <View className="gap-sm mt-xl">
-            {oauthProviders.map((provider) => (
-              <Pressable
-                key={provider.id}
-                onPress={() => handleProvider(provider.id)}
-                className="rounded-sm px-2xl py-md items-center border border-hairline dark:border-hairline-dark active:opacity-60"
-                style={{ minHeight: 44 }}>
-                <Text className="text-label font-sans-medium text-ink dark:text-ink-dark">
-                  Continue with {provider.label}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
-
-          <View className="flex-row items-center gap-md mt-xl">
-            <View className="flex-1 h-px bg-hairline dark:bg-hairline-dark" />
-            <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">or</Text>
-            <View className="flex-1 h-px bg-hairline dark:bg-hairline-dark" />
-          </View>
 
           <View className="flex-row gap-lg mt-xl">
             <Pressable onPress={() => setMode('signin')} hitSlop={8}>
