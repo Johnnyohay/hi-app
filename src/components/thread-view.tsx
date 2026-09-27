@@ -16,8 +16,10 @@ import {
   fileReport,
   helpRequestMessage,
   isBlocked,
+  markThreadRead,
   rateProfile,
   sendMessage,
+  subscribeToThread,
   unblockUser,
   type Message,
   type Profile,
@@ -299,8 +301,18 @@ export function ThreadView({
     isBlocked(myUserId, person.id).then((value) => {
       if (!cancelled) setBlocked(value);
     });
+    // Opening a thread marks the other person's messages read. Best-effort —
+    // a failure here shouldn't block viewing the thread.
+    markThreadRead(myUserId, person.id).catch(() => {});
+
+    const unsubscribe = subscribeToThread(myUserId, person.id, (incoming) => {
+      setMessages((current) => (current ? [...current, incoming] : [incoming]));
+      markThreadRead(myUserId, person.id).catch(() => {});
+    });
+
     return () => {
       cancelled = true;
+      unsubscribe();
     };
   }, [myUserId, person.id]);
 

@@ -20,6 +20,11 @@ export default function AppTabs() {
         />
       </NativeTabs.Trigger>
 
+      <NativeTabs.Trigger name="messages">
+        <NativeTabs.Trigger.Label>Messages</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="bubble.left" md="chat_bubble" />
+      </NativeTabs.Trigger>
+
       <NativeTabs.Trigger name="explore">
         <NativeTabs.Trigger.Label>Network</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon

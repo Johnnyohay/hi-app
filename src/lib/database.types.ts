@@ -51,13 +51,13 @@ export type Database = {
                   ]
                 },"messages": {
                   Row: {
-                    "body": string,"created_at": string,"from_user_id": string,"id": string,"kind": string,"to_user_id": string
+                    "body": string,"created_at": string,"from_user_id": string,"id": string,"kind": string,"read_at": string | null,"to_user_id": string
                   }
                   Insert: {
-                    "body": string,"created_at"?: string,"from_user_id": string,"id"?: string,"kind"?: string,"to_user_id": string
+                    "body": string,"created_at"?: string,"from_user_id": string,"id"?: string,"kind"?: string,"read_at"?: string | null,"to_user_id": string
                   }
                   Update: {
-                    "body"?: string,"created_at"?: string,"from_user_id"?: string,"id"?: string,"kind"?: string,"to_user_id"?: string
+                    "body"?: string,"created_at"?: string,"from_user_id"?: string,"id"?: string,"kind"?: string,"read_at"?: string | null,"to_user_id"?: string
                   }
                   Relationships: [
                     
@@ -71,6 +71,19 @@ export type Database = {
                   }
                   Update: {
                     "bio"?: string,"city"?: string,"created_at"?: string,"current_ask"?: string,"id"?: string,"is_demo"?: boolean,"lat"?: number | null,"lng"?: number | null,"name"?: string,"offer_category"?: string | null,"offer_text"?: string,"photo_url"?: string | null,"role"?: string,"skills"?: (string)[],"social_links"?: NonNullable<Json>,"updated_at"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"push_tokens": {
+                  Row: {
+                    "created_at": string,"id": string,"token": string,"user_id": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"token": string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"token"?: string,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -107,7 +120,12 @@ export type Database = {
             [_ in never]: never
           }
           Functions: {
-            [_ in never]: never
+            "has_messaged":
+{ Args: { "user_a": string,"user_b": string }; Returns: boolean
+                           },
+"is_blocked_between":
+{ Args: { "user_a": string,"user_b": string }; Returns: boolean
+                           }
           }
           Enums: {
             [_ in never]: never

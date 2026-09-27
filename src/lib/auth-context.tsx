@@ -2,6 +2,7 @@ import type { Session } from '@supabase/supabase-js';
 import { router } from 'expo-router';
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
 
+import { registerForPushNotifications } from '@/lib/push-notifications';
 import { isSupabaseConfigured, supabase } from '@/lib/supabase';
 
 type AuthContextValue = {
@@ -32,6 +33,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     return () => listener.subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (session) registerForPushNotifications(session.user.id);
+    // Only re-run when the signed-in user actually changes — `session`
+    // itself gets a new object reference on every token refresh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.user.id]);
 
   async function signInWithPassword(email: string, password: string) {
     if (!isSupabaseConfigured) {

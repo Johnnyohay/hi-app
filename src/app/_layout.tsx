@@ -7,9 +7,10 @@ import {
 } from '@expo-google-fonts/ibm-plex-sans';
 import { IBMPlexMono_400Regular, IBMPlexMono_500Medium, useFonts as usePlexMonoFonts } from '@expo-google-fonts/ibm-plex-mono';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider, usePathname, useRouter } from 'expo-router';
+import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-import { useColorScheme } from 'react-native';
+import { Platform, useColorScheme } from 'react-native';
 
 import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import { Colors } from '@/constants/theme';
@@ -37,6 +38,20 @@ function RootLayout() {
     if (pathname === '/') {
       router.replace('/sign-in');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Tapping a message notification opens that conversation directly. The
+  // sending function includes the other person's id as `data.threadUserId`.
+  useEffect(() => {
+    if (Platform.OS === 'web') return;
+    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
+      const threadUserId = response.notification.request.content.data?.threadUserId;
+      if (typeof threadUserId === 'string') {
+        router.push({ pathname: '/thread/[id]', params: { id: threadUserId } });
+      }
+    });
+    return () => subscription.remove();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -227,6 +227,88 @@ export async function fetchMyMessages(myUserId: string): Promise<Message[]> {
   return data as Message[];
 }
 
+export type ThreadSummary = {
+  person: Profile;
+  lastMessage: Message;
+  unreadCount: number;
+};
+
+/** One row per person I've exchanged messages with, newest conversation first, with an unread count. */
+export async function fetchMyThreads(myUserId: string): Promise<ThreadSummary[]> {
+  const [messages, network] = await Promise.all([fetchMyMessages(myUserId), fetchNetwork(myUserId)]);
+  const profileById = new Map(network.map((person) => [person.id, person]));
+
+  const byOther = new Map<string, { lastMessage: Message; unreadCount: number }>();
+  for (const message of messages) {
+    const otherId = message.from_user_id === myUserId ? message.to_user_id : message.from_user_id;
+    const isUnreadIncoming = message.to_user_id === myUserId && !message.read_at;
+    const existing = byOther.get(otherId);
+    if (!existing) {
+      byOther.set(otherId, { lastMessage: message, unreadCount: isUnreadIncoming ? 1 : 0 });
+    } else if (isUnreadIncoming) {
+      existing.unreadCount += 1;
+    }
+  }
+
+  const threads: ThreadSummary[] = [];
+  for (const [otherId, entry] of byOther) {
+    const person = profileById.get(otherId);
+    if (person) threads.push({ person, ...entry });
+  }
+  return threads;
+}
+
+/** Marks every message from otherUserId to me as read — called when a thread is opened. */
+export async function markThreadRead(myUserId: string, otherUserId: string): Promise<void> {
+  const { error } = await supabase
+    .from('messages')
+    .update({ read_at: new Date().toISOString() })
+    .eq('to_user_id', myUserId)
+    .eq('from_user_id', otherUserId)
+    .is('read_at', null);
+  if (error) throw error;
+}
+
+/** Live updates for one open thread — only the other person's incoming messages, since my own sends are already appended locally. */
+export function subscribeToThread(
+  myUserId: string,
+  otherUserId: string,
+  onMessage: (message: Message) => void
+): () => void {
+  const channel = supabase
+    .channel(`thread:${[myUserId, otherUserId].sort().join(':')}`)
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'messages', filter: `from_user_id=eq.${otherUserId}` },
+      (payload) => onMessage(payload.new as Message)
+    )
+    .subscribe();
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
+/** Live updates for the inbox as a whole — any new incoming message triggers a refetch of the thread list. */
+export function subscribeToMyInbox(myUserId: string, onNewMessage: () => void): () => void {
+  const channel = supabase
+    .channel(`inbox:${myUserId}`)
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'messages', filter: `to_user_id=eq.${myUserId}` },
+      () => onNewMessage()
+    )
+    .subscribe();
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}
+
+/** Registers (or re-associates) a device's push token with the current user. */
+export async function registerPushToken(userId: string, token: string): Promise<void> {
+  const { error } = await supabase.from('push_tokens').upsert({ user_id: userId, token }, { onConflict: 'token' });
+  if (error) throw error;
+}
+
 /** Last-contact timestamp per other-party user id, derived from a message list. */
 export function lastContactByUser(myUserId: string, messages: Message[]): Map<string, string> {
   const map = new Map<string, string>();
