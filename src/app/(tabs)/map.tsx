@@ -8,6 +8,7 @@ import { ContentMaxWidth, ListPaneWidth } from '@/constants/theme';
 import { colorTokens } from '@/constants/tokens';
 import { useAuth } from '@/lib/auth-context';
 import { fetchMyProfile, fetchNetwork, type Profile } from '@/lib/api';
+import { flagPrefix } from '@/lib/country-flag';
 import { useIsWideScreen } from '@/hooks/use-breakpoint';
 
 function project(lat: number, lng: number) {
@@ -122,7 +123,7 @@ function DetailCard({ person, onMessage }: { person: Profile; onMessage: () => v
         <View className="flex-1 gap-xs">
           <Text className="text-title font-serif-medium text-ink dark:text-ink-dark">{person.name}</Text>
           <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
-            {person.city} — {person.role}
+            {flagPrefix(person.country_code)}{person.city} — {person.role}
           </Text>
         </View>
       </View>
@@ -161,7 +162,7 @@ function MeDetailCard({ me }: { me: Profile }) {
             {me.name} (you)
           </Text>
           <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
-            {me.city} — {me.role}
+            {flagPrefix(me.country_code)}{me.city} — {me.role}
           </Text>
         </View>
       </View>

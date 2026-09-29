@@ -2,6 +2,7 @@ import { Pressable, Text, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
 import type { Profile } from '@/lib/api';
+import { flagPrefix } from '@/lib/country-flag';
 
 export function PersonRow({
   person,
@@ -31,7 +32,7 @@ export function PersonRow({
           )}
         </View>
         <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
-          {person.city} — {person.role}
+          {flagPrefix(person.country_code)}{person.city} — {person.role}
         </Text>
         <Text className="text-body font-sans text-ink dark:text-ink-dark">{person.offer_text}</Text>
       </View>

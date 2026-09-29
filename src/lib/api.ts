@@ -69,6 +69,12 @@ export async function updateMyProfile(userId: string, updates: Partial<Profile>)
   return data as Profile;
 }
 
+/** Permanently deletes the signed-in user's account and all their data. Irreversible. */
+export async function deleteMyAccount(): Promise<void> {
+  const { error } = await supabase.functions.invoke('delete-account', { method: 'POST' });
+  if (error) throw error;
+}
+
 /** Everyone else in the directory. */
 /** Everyone excludeUserId has blocked — used to keep blocked people out of the directory automatically. */
 async function fetchBlockedIds(userId: string): Promise<string[]> {

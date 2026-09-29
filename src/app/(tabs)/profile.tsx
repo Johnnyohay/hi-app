@@ -22,6 +22,7 @@ import { colorTokens } from '@/constants/tokens';
 import { useAuth } from '@/lib/auth-context';
 import {
   deleteAvatarByUrl,
+  deleteMyAccount,
   fetchMyAsks,
   fetchMyProfile,
   fetchMyReceivedRatings,
@@ -34,6 +35,8 @@ import {
   type Profile,
   type Rating,
 } from '@/lib/api';
+import { flagPrefix } from '@/lib/country-flag';
+import { countryCodeForCoords } from '@/lib/geocoding';
 
 const PROFILE_MAX_WIDTH = 1040;
 
@@ -42,6 +45,77 @@ function SectionLabel({ children }: { children: string }) {
     <Text className="text-label font-mono-medium text-ink-muted dark:text-ink-muted-dark uppercase">
       {children}
     </Text>
+  );
+}
+
+function DeleteAccountPanel({ placeholderColor }: { placeholderColor: string }) {
+  const { signOut } = useAuth();
+  const [expanded, setExpanded] = useState(false);
+  const [confirmText, setConfirmText] = useState('');
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function confirmDelete() {
+    setDeleting(true);
+    setError(null);
+    try {
+      await deleteMyAccount();
+      await signOut();
+      router.replace('/sign-in');
+    } catch {
+      setError("Couldn't delete your account. Try again in a moment.");
+      setDeleting(false);
+    }
+  }
+
+  if (!expanded) {
+    return (
+      <Pressable onPress={() => setExpanded(true)} hitSlop={8}>
+        <Text className="text-caption font-sans-medium text-ink-muted dark:text-ink-muted-dark">
+          Delete account
+        </Text>
+      </Pressable>
+    );
+  }
+
+  return (
+    <View className="gap-sm">
+      <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
+        This permanently deletes your profile, messages, ratings, and everything else — it
+        can&apos;t be undone. Type DELETE to confirm.
+      </Text>
+      <TextInput
+        className="text-caption font-sans text-ink dark:text-ink-dark border border-hairline dark:border-hairline-dark rounded-sm px-md py-sm"
+        style={{ minHeight: 40, outlineWidth: 0 }}
+        value={confirmText}
+        onChangeText={setConfirmText}
+        placeholder="DELETE"
+        placeholderTextColor={placeholderColor}
+        autoCapitalize="characters"
+        autoCorrect={false}
+      />
+      {error && (
+        <Text className="text-caption font-sans text-accent dark:text-accent-dark">{error}</Text>
+      )}
+      <View className="flex-row gap-lg">
+        <Pressable onPress={confirmDelete} disabled={confirmText !== 'DELETE' || deleting} hitSlop={8}>
+          {deleting ? (
+            <ActivityIndicator size="small" />
+          ) : (
+            <Text
+              className="text-label font-sans-medium text-accent dark:text-accent-dark"
+              style={{ opacity: confirmText === 'DELETE' ? 1 : 0.35 }}>
+              Permanently delete my account
+            </Text>
+          )}
+        </Pressable>
+        <Pressable onPress={() => setExpanded(false)} hitSlop={8} disabled={deleting}>
+          <Text className="text-label font-sans-medium text-ink-muted dark:text-ink-muted-dark">
+            Cancel
+          </Text>
+        </Pressable>
+      </View>
+    </View>
   );
 }
 
@@ -137,9 +211,11 @@ export default function ProfileScreen() {
     setLocating(true);
     try {
       const position = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = position.coords;
+      const countryCode = await countryCodeForCoords(latitude, longitude);
       setMe(
         (current) =>
-          current && { ...current, lat: position.coords.latitude, lng: position.coords.longitude }
+          current && { ...current, lat: latitude, lng: longitude, country_code: countryCode }
       );
     } finally {
       setLocating(false);
@@ -163,6 +239,11 @@ export default function ProfileScreen() {
           social_links: me.social_links,
           lat: me.lat,
           lng: me.lng,
+          country_code: me.country_code,
+          hometown_city: me.hometown_city,
+          hometown_lat: me.hometown_lat,
+          hometown_lng: me.hometown_lng,
+          hometown_country_code: me.hometown_country_code,
         });
         setMe(saved);
       } finally {
@@ -245,38 +326,77 @@ export default function ProfileScreen() {
                   {me.role}
                 </Text>
                 {editing ? (
-                  <View className="gap-xs" style={{ position: 'relative' }}>
-                    <CityTypeahead
-                      value={me.city}
-                      onChangeText={(city) => setMe((current) => current && { ...current, city })}
-                      onSelectCity={(suggestion) =>
-                        setMe(
-                          (current) =>
-                            current && {
-                              ...current,
-                              city: suggestion.label,
-                              lat: suggestion.lat,
-                              lng: suggestion.lng,
-                            }
-                        )
-                      }
-                      placeholder="City"
-                      placeholderTextColor={placeholderColor}
-                    />
-                    <Pressable onPress={useCurrentLocation} disabled={locating} hitSlop={8}>
-                      {locating ? (
-                        <ActivityIndicator size="small" />
-                      ) : (
-                        <Text className="text-caption font-sans-medium text-accent dark:text-accent-dark">
-                          {me.lat != null ? 'Update pin on map' : 'Use current location for map'}
-                        </Text>
-                      )}
-                    </Pressable>
+                  <View className="gap-sm">
+                    <View className="gap-xs" style={{ position: 'relative' }}>
+                      <Text className="text-label font-mono-medium text-ink-muted dark:text-ink-muted-dark uppercase">
+                        From
+                      </Text>
+                      <CityTypeahead
+                        value={me.hometown_city}
+                        onChangeText={(hometown_city) =>
+                          setMe((current) => current && { ...current, hometown_city })
+                        }
+                        onSelectCity={(suggestion) =>
+                          setMe(
+                            (current) =>
+                              current && {
+                                ...current,
+                                hometown_city: suggestion.label,
+                                hometown_lat: suggestion.lat,
+                                hometown_lng: suggestion.lng,
+                                hometown_country_code: suggestion.countryCode,
+                              }
+                          )
+                        }
+                        placeholder="Where you're from"
+                        placeholderTextColor={placeholderColor}
+                      />
+                    </View>
+                    <View className="gap-xs" style={{ position: 'relative' }}>
+                      <Text className="text-label font-mono-medium text-ink-muted dark:text-ink-muted-dark uppercase">
+                        Currently in
+                      </Text>
+                      <CityTypeahead
+                        value={me.city}
+                        onChangeText={(city) => setMe((current) => current && { ...current, city })}
+                        onSelectCity={(suggestion) =>
+                          setMe(
+                            (current) =>
+                              current && {
+                                ...current,
+                                city: suggestion.label,
+                                lat: suggestion.lat,
+                                lng: suggestion.lng,
+                                country_code: suggestion.countryCode,
+                              }
+                          )
+                        }
+                        placeholder="City"
+                        placeholderTextColor={placeholderColor}
+                      />
+                      <Pressable onPress={useCurrentLocation} disabled={locating} hitSlop={8}>
+                        {locating ? (
+                          <ActivityIndicator size="small" />
+                        ) : (
+                          <Text className="text-caption font-sans-medium text-accent dark:text-accent-dark">
+                            {me.lat != null ? 'Update pin on map' : 'Use current location for map'}
+                          </Text>
+                        )}
+                      </Pressable>
+                    </View>
                   </View>
                 ) : (
-                  <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
-                    {me.city || 'Add your city'}
-                  </Text>
+                  <View className="gap-xs">
+                    {me.hometown_city ? (
+                      <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
+                        From {flagPrefix(me.hometown_country_code)}
+                        {me.hometown_city}
+                      </Text>
+                    ) : null}
+                    <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
+                      {me.city ? `${flagPrefix(me.country_code)}${me.city}` : 'Add your city'}
+                    </Text>
+                  </View>
                 )}
               </View>
             </View>
@@ -515,6 +635,13 @@ export default function ProfileScreen() {
                 ))}
               </View>
             )}
+          </View>
+
+          <View className="gap-sm mt-2xl">
+            <SectionLabel>Account</SectionLabel>
+            <View className="mt-xs">
+              <DeleteAccountPanel placeholderColor={placeholderColor} />
+            </View>
           </View>
 
         </View>

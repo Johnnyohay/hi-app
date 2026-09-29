@@ -64,13 +64,13 @@ export type Database = {
                   ]
                 },"profiles": {
                   Row: {
-                    "bio": string,"city": string,"created_at": string,"current_ask": string,"id": string,"is_demo": boolean,"lat": number | null,"lng": number | null,"name": string,"offer_category": string | null,"offer_text": string,"photo_url": string | null,"role": string,"skills": (string)[],"social_links": NonNullable<Json>,"updated_at": string
+                    "bio": string,"city": string,"country_code": string | null,"created_at": string,"current_ask": string,"hometown_city": string,"hometown_country_code": string | null,"hometown_lat": number | null,"hometown_lng": number | null,"id": string,"is_demo": boolean,"lat": number | null,"lng": number | null,"name": string,"offer_category": string | null,"offer_text": string,"photo_url": string | null,"role": string,"skills": (string)[],"social_links": NonNullable<Json>,"updated_at": string
                   }
                   Insert: {
-                    "bio"?: string,"city"?: string,"created_at"?: string,"current_ask"?: string,"id": string,"is_demo"?: boolean,"lat"?: number | null,"lng"?: number | null,"name"?: string,"offer_category"?: string | null,"offer_text"?: string,"photo_url"?: string | null,"role"?: string,"skills"?: (string)[],"social_links"?: NonNullable<Json>,"updated_at"?: string
+                    "bio"?: string,"city"?: string,"country_code"?: string | null,"created_at"?: string,"current_ask"?: string,"hometown_city"?: string,"hometown_country_code"?: string | null,"hometown_lat"?: number | null,"hometown_lng"?: number | null,"id": string,"is_demo"?: boolean,"lat"?: number | null,"lng"?: number | null,"name"?: string,"offer_category"?: string | null,"offer_text"?: string,"photo_url"?: string | null,"role"?: string,"skills"?: (string)[],"social_links"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Update: {
-                    "bio"?: string,"city"?: string,"created_at"?: string,"current_ask"?: string,"id"?: string,"is_demo"?: boolean,"lat"?: number | null,"lng"?: number | null,"name"?: string,"offer_category"?: string | null,"offer_text"?: string,"photo_url"?: string | null,"role"?: string,"skills"?: (string)[],"social_links"?: NonNullable<Json>,"updated_at"?: string
+                    "bio"?: string,"city"?: string,"country_code"?: string | null,"created_at"?: string,"current_ask"?: string,"hometown_city"?: string,"hometown_country_code"?: string | null,"hometown_lat"?: number | null,"hometown_lng"?: number | null,"id"?: string,"is_demo"?: boolean,"lat"?: number | null,"lng"?: number | null,"name"?: string,"offer_category"?: string | null,"offer_text"?: string,"photo_url"?: string | null,"role"?: string,"skills"?: (string)[],"social_links"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Relationships: [
                     
