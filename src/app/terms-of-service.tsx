@@ -31,7 +31,7 @@ export default function TermsOfServiceScreen() {
 
           <Text className="text-display font-serif-semibold text-ink dark:text-ink-dark">Terms of Service</Text>
           <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark mt-xs">
-            Last updated September 25, 2026
+            Last updated September 30, 2026
           </Text>
 
           <H2>1. Acceptance</H2>
@@ -42,9 +42,10 @@ export default function TermsOfServiceScreen() {
 
           <H2>2. Who can use Hi</H2>
           <P>
-            You must be at least 13 years old to use Hi. You must provide accurate information
-            when creating your account, and you&apos;re responsible for keeping your login credentials
-            secure and for everything that happens under your account.
+            You must be at least 18 years old to use Hi. By creating an account, you represent
+            that you meet this requirement. You must provide accurate information when creating
+            your account, and you&apos;re responsible for keeping your login credentials secure and
+            for everything that happens under your account.
           </P>
 
           <H2>3. What Hi is — and isn&apos;t</H2>

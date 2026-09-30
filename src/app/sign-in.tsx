@@ -200,8 +200,9 @@ export default function SignInScreen() {
                   onPress={() => router.push('/privacy-policy')}>
                   Privacy Policy
                 </Text>
-                , and I understand Hi doesn&apos;t verify who I&apos;m talking to — I&apos;ll use
-                ordinary caution, like meeting in public, before meeting anyone in person.
+                , that I&apos;m 18 or older, and I understand Hi doesn&apos;t verify who I&apos;m talking
+                to — I&apos;ll use ordinary caution, like meeting in public, before meeting anyone in
+                person.
               </Text>
             </Pressable>
           )}

@@ -31,7 +31,7 @@ export default function PrivacyPolicyScreen() {
 
           <Text className="text-display font-serif-semibold text-ink dark:text-ink-dark">Privacy Policy</Text>
           <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark mt-xs">
-            Last updated September 25, 2026
+            Last updated September 30, 2026
           </Text>
 
           <P>
@@ -42,16 +42,15 @@ export default function PrivacyPolicyScreen() {
 
           <H2>Information we collect</H2>
           <P>
-            When you create an account: the email and password you provide (or, once available,
-            the name/email a sign-in provider like Google or Microsoft shares — this option exists
-            in the app but is not active yet).
+            When you create an account: the email and password you provide.
           </P>
           <P>
-            When you build your profile, only what you choose to add: name, role, city, bio, the
-            skills you list, what you&apos;re currently looking for, links to your other profiles, and
-            an optional profile photo. Location is only ever collected as a map coordinate you
-            either type in (via city search) or share from your device — never tracked in the
-            background, and never required.
+            When you build your profile, only what you choose to add: name, role, your current
+            city and, optionally, the city you&apos;re originally from, bio, the skills you list, what
+            you&apos;re currently looking for, links to your other profiles, and an optional profile
+            photo. Location is only ever collected as a map coordinate you either type in (via
+            city search) or share from your device — never tracked in the background, and never
+            required.
           </P>
           <P>
             Content you create: messages you send in a one-to-one chat, requests (&quot;asks&quot;) you share
@@ -86,17 +85,17 @@ export default function PrivacyPolicyScreen() {
           <P>
             Hi&apos;s backend — accounts, database, file storage — runs on Supabase, which processes
             this data on our behalf as our infrastructure provider. When you search for a city, that
-            search text is sent to Mapbox to look up matching places. If you sign in with Google or
-            Microsoft once that option is enabled, we receive the basic profile information those
-            providers share when you authorize it. We don&apos;t share your information with anyone
-            beyond what&apos;s needed to operate the app through these providers.
+            search text is sent to Mapbox to look up matching places. If the app crashes or hits an
+            error, technical details about that error (not your messages or profile content) are
+            sent to Sentry so we can fix it. We don&apos;t share your information with anyone beyond
+            what&apos;s needed to operate the app through these providers.
           </P>
 
           <H2>Data retention and deletion</H2>
           <P>
             Your data is kept for as long as your account is active. You can delete or edit most of
-            your profile directly in the app at any time. To delete your account and associated
-            data entirely, contact us at the address below.
+            your profile directly in the app at any time. To delete your account and all associated
+            data entirely and immediately, go to Profile → Account → Delete account in the app.
           </P>
 
           <H2>Security</H2>
@@ -110,8 +109,9 @@ export default function PrivacyPolicyScreen() {
 
           <H2>Children&apos;s privacy</H2>
           <P>
-            Hi is not directed at, and may not be used by, anyone under 13 years old. If we learn an
-            account belongs to someone under 13, we will delete it.
+            Hi is an adults-only service: you must be 18 or older to use it, and it is not
+            directed at anyone younger. If we learn an account belongs to someone under 18, we
+            will delete it.
           </P>
 
           <H2>Changes to this policy</H2>
