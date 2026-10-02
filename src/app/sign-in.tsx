@@ -17,6 +17,7 @@ export default function SignInScreen() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [inviteCode, setInviteCode] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [status, setStatus] = useState<{ kind: 'idle' | 'sent' | 'error'; message?: string }>({
@@ -36,13 +37,14 @@ export default function SignInScreen() {
   async function handleSubmit() {
     const trimmed = email.trim();
     const trimmedName = name.trim();
+    const trimmedInviteCode = inviteCode.trim();
     if (!trimmed || !password) return;
-    if (mode === 'signup' && (!trimmedName || !agreedToTerms)) return;
+    if (mode === 'signup' && (!trimmedName || !agreedToTerms || !trimmedInviteCode)) return;
 
     const { error } =
       mode === 'signin'
         ? await signInWithPassword(trimmed, password)
-        : await signUpWithPassword(trimmed, password, trimmedName);
+        : await signUpWithPassword(trimmed, password, trimmedName, trimmedInviteCode);
 
     if (error) {
       setStatus({ kind: 'error', message: error });
@@ -56,7 +58,8 @@ export default function SignInScreen() {
   const canSubmit =
     email.trim().length > 0 &&
     password.length > 0 &&
-    (mode === 'signin' || (name.trim().length > 0 && agreedToTerms));
+    (mode === 'signin' ||
+      (name.trim().length > 0 && agreedToTerms && inviteCode.trim().length > 0));
 
   return (
     <SafeAreaView
@@ -103,6 +106,12 @@ export default function SignInScreen() {
           </View>
 
           {mode === 'signup' && (
+            <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark mt-xl">
+              Hi is invite-only right now — you&apos;ll need a code from someone already on it.
+            </Text>
+          )}
+
+          {mode === 'signup' && (
             <TextInput
               className="text-body font-sans text-ink dark:text-ink-dark mt-lg rounded-sm border border-hairline dark:border-hairline-dark px-lg"
               style={{ minHeight: 48, outlineWidth: 0 }}
@@ -114,6 +123,23 @@ export default function SignInScreen() {
               placeholder="Your name"
               placeholderTextColor={placeholderColor}
               autoCapitalize="words"
+              returnKeyType="next"
+            />
+          )}
+
+          {mode === 'signup' && (
+            <TextInput
+              className="text-body font-sans text-ink dark:text-ink-dark mt-lg rounded-sm border border-hairline dark:border-hairline-dark px-lg"
+              style={{ minHeight: 48, outlineWidth: 0 }}
+              value={inviteCode}
+              onChangeText={(value) => {
+                setInviteCode(value);
+                setStatus({ kind: 'idle' });
+              }}
+              placeholder="Invite code"
+              placeholderTextColor={placeholderColor}
+              autoCapitalize="characters"
+              autoCorrect={false}
               returnKeyType="next"
             />
           )}

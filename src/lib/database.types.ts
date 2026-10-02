@@ -49,6 +49,19 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"invite_codes": {
+                  Row: {
+                    "code": string,"created_at": string,"max_uses": number,"uses": number
+                  }
+                  Insert: {
+                    "code": string,"created_at"?: string,"max_uses"?: number,"uses"?: number
+                  }
+                  Update: {
+                    "code"?: string,"created_at"?: string,"max_uses"?: number,"uses"?: number
+                  }
+                  Relationships: [
+                    
+                  ]
                 },"messages": {
                   Row: {
                     "body": string,"created_at": string,"from_user_id": string,"id": string,"kind": string,"read_at": string | null,"to_user_id": string
@@ -125,6 +138,9 @@ export type Database = {
                            },
 "is_blocked_between":
 { Args: { "user_a": string,"user_b": string }; Returns: boolean
+                           },
+"is_invite_code_valid":
+{ Args: { "code_to_check": string }; Returns: boolean
                            }
           }
           Enums: {
@@ -252,4 +268,3 @@ export const Constants = {
           }
         }
 } as const
-

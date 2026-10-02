@@ -9,7 +9,12 @@ type AuthContextValue = {
   session: Session | null;
   loading: boolean;
   signInWithPassword: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUpWithPassword: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
+  signUpWithPassword: (
+    email: string,
+    password: string,
+    fullName: string,
+    inviteCode: string
+  ) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
 };
 
@@ -49,14 +54,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error?.message ?? null };
   }
 
-  async function signUpWithPassword(email: string, password: string, fullName: string) {
+  async function signUpWithPassword(email: string, password: string, fullName: string, inviteCode: string) {
     if (!isSupabaseConfigured) {
       return { error: 'Backend not connected yet. See setup steps.' };
     }
+
+    const trimmedCode = inviteCode.trim();
+    const { data: codeValid, error: codeCheckError } = await supabase.rpc('is_invite_code_valid', {
+      code_to_check: trimmedCode,
+    });
+    if (codeCheckError) return { error: codeCheckError.message };
+    if (!codeValid) return { error: "That invite code isn't valid." };
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } },
+      options: { data: { full_name: fullName, invite_code: trimmedCode } },
     });
     return { error: error?.message ?? null };
   }
