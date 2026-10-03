@@ -2,10 +2,10 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  FlatList,
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   useColorScheme,
@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { MapCanvas, PersonSummaryCard } from '@/components/people-map';
 import { PersonRow } from '@/components/person-row';
 import { askCategories, type AskCategoryId } from '@/constants/mock-network';
 import { colorTokens } from '@/constants/tokens';
@@ -36,6 +37,67 @@ function CategoryChip({
       style={{ minHeight: 44, justifyContent: 'center' }}>
       <Text className="text-body font-sans-medium text-ink dark:text-ink-dark">{label}</Text>
     </Pressable>
+  );
+}
+
+type ResultsView = 'list' | 'map';
+
+function ViewToggle({ view, onChange }: { view: ResultsView; onChange: (view: ResultsView) => void }) {
+  return (
+    <View className="flex-row gap-lg">
+      {(['list', 'map'] as const).map((option) => (
+        <Pressable key={option} onPress={() => onChange(option)} hitSlop={8}>
+          <Text
+            className={`text-label font-sans-medium capitalize ${
+              view === option ? 'text-ink dark:text-ink-dark' : 'text-ink-muted dark:text-ink-muted-dark'
+            }`}>
+            {option}
+          </Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+}
+
+/** The "designated place" — who's currently offering to help with this ask, live as you type, as a list or a map. */
+function WhoCanHelp({ matches, onMessage }: { matches: Profile[]; onMessage: (id: string) => void }) {
+  const [view, setView] = useState<ResultsView>('list');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selected = matches.find((person) => person.id === selectedId) ?? null;
+
+  return (
+    <View className="mt-2xl gap-md">
+      <View className="flex-row items-baseline justify-between">
+        <Text className="text-caption font-mono text-ink-muted dark:text-ink-muted-dark uppercase">
+          {matches.length} {matches.length === 1 ? 'person offers' : 'people offer'} this
+        </Text>
+        {matches.length > 0 && <ViewToggle view={view} onChange={setView} />}
+      </View>
+
+      {matches.length === 0 ? (
+        <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
+          Nobody matches yet — keep typing, or try the category alone.
+        </Text>
+      ) : view === 'list' ? (
+        <View className="rounded-sm border border-hairline dark:border-hairline-dark overflow-hidden">
+          {matches.map((person) => (
+            <PersonRow key={person.id} person={person} onPress={() => onMessage(person.id)} />
+          ))}
+        </View>
+      ) : (
+        <View className="gap-md">
+          <MapCanvas network={matches} selectedId={selectedId} onSelect={setSelectedId} />
+          {selected ? (
+            <PersonSummaryCard person={selected} onMessage={() => onMessage(selected.id)} />
+          ) : (
+            <Text className="text-caption font-sans text-ink-muted dark:text-ink-muted-dark">
+              Tap a pin to see who&apos;s there — people without a location on their profile
+              won&apos;t show here, but do in the list.
+            </Text>
+          )}
+        </View>
+      )}
+    </View>
   );
 }
 
@@ -65,6 +127,11 @@ export default function AskScreen() {
 
   const activeCategory = askCategories.find((entry) => entry.id === category);
   const matches = submitted && network ? matchPeopleForAsk(network, submitted.need, submitted.category) : [];
+  const liveMatches = network && category ? matchPeopleForAsk(network, need, category) : [];
+
+  function goToThread(id: string) {
+    router.push({ pathname: '/thread/[id]', params: { id } });
+  }
 
   async function handleSend() {
     if (!canSend || !category || !session || sending) return;
@@ -116,10 +183,7 @@ export default function AskScreen() {
           <View className="flex-1 w-full" style={{ maxWidth: COMPOSER_MAX_WIDTH }}>
             <View className="px-lg pt-2xl pb-lg gap-xs">
               <Text className="text-caption font-mono text-ink-muted dark:text-ink-muted-dark uppercase">
-                {submittedCategory?.label} ·{' '}
-                {matches.length > 0
-                  ? `${matches.length} match${matches.length === 1 ? '' : 'es'}`
-                  : 'No matches yet'}
+                {submittedCategory?.label}
               </Text>
               <Text className="text-title font-serif-medium text-ink dark:text-ink-dark">
                 “{submitted.need}”
@@ -136,28 +200,9 @@ export default function AskScreen() {
               </Text>
             </View>
 
-            {matches.length > 0 ? (
-              <FlatList
-                data={matches}
-                keyExtractor={(person) => person.id}
-                renderItem={({ item }) => (
-                  <PersonRow
-                    person={item}
-                    onPress={() =>
-                      router.push({ pathname: '/thread/[id]', params: { id: item.id } })
-                    }
-                  />
-                )}
-                contentContainerClassName="pb-2xl"
-              />
-            ) : (
-              <View className="px-lg pt-lg">
-                <Text className="text-body font-sans text-ink-muted dark:text-ink-muted-dark">
-                  Thanks for listing your request — we&apos;ll surface people from your network as
-                  soon as there&apos;s a match.
-                </Text>
-              </View>
-            )}
+            <ScrollView contentContainerClassName="px-lg pb-2xl">
+              <WhoCanHelp matches={matches} onMessage={goToThread} />
+            </ScrollView>
           </View>
         </View>
       </SafeAreaView>
@@ -228,6 +273,8 @@ export default function AskScreen() {
         </Text>
       )}
 
+      <WhoCanHelp matches={liveMatches} onMessage={goToThread} />
+
       {isWide && (
         <Pressable
           disabled={!canSend || !network || sending}
@@ -254,10 +301,12 @@ export default function AskScreen() {
         className="flex-1"
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         {isWide ? (
-          <View className="flex-1 items-center px-lg pt-2xl">{field}</View>
+          <ScrollView contentContainerClassName="items-center px-lg pt-2xl pb-2xl">{field}</ScrollView>
         ) : (
           <>
-            <View className="flex-1 px-lg pt-2xl">{field}</View>
+            <ScrollView className="flex-1" contentContainerClassName="px-lg pt-2xl pb-lg">
+              {field}
+            </ScrollView>
             <View className="px-lg pb-lg">
               <Pressable
                 disabled={!canSend || !network || sending}
