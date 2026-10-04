@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, usePathname } from 'expo-router';
 import { Tabs, TabList, TabTrigger, TabSlot, TabTriggerSlotProps, TabListProps } from 'expo-router/ui';
 import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
 
@@ -26,6 +26,7 @@ export default function AppTabs() {
           <TabTrigger name="profile" href="/profile" asChild>
             <TabButton>Profile</TabButton>
           </TabTrigger>
+          <AboutLink />
         </CustomTabList>
       </TabList>
       <TabSlot style={{ flex: 1 }} />
@@ -52,6 +53,26 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
   );
 }
 
+/** Not a tab route (About lives outside the (tabs) group) — styled to match TabButton so it reads as one. */
+function AboutLink() {
+  const scheme = useColorScheme();
+  const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
+  const isFocused = usePathname() === '/about';
+
+  return (
+    <Pressable
+      onPress={() => router.push('/about')}
+      style={({ pressed }) => [styles.tabButtonView, pressed && styles.pressed]}>
+      <ThemedText type="label" themeColor={isFocused ? 'ink' : 'inkMuted'}>
+        About
+      </ThemedText>
+      <View
+        style={[styles.tabIndicator, { backgroundColor: isFocused ? colors.accent : 'transparent' }]}
+      />
+    </Pressable>
+  );
+}
+
 export function CustomTabList(props: TabListProps) {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
@@ -69,11 +90,6 @@ export function CustomTabList(props: TabListProps) {
           <ThemedText type="label" themeColor="inkMuted">
             True connections, fast and easy
           </ThemedText>
-          <Pressable onPress={() => router.push('/about')} hitSlop={8}>
-            <ThemedText type="label" themeColor="accent" style={styles.aboutLink}>
-              About
-            </ThemedText>
-          </Pressable>
         </View>
 
         <View style={styles.tabsRow}>{props.children}</View>
@@ -106,9 +122,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'baseline',
     gap: Spacing.sm,
-  },
-  aboutLink: {
-    textDecorationLine: 'underline',
   },
   pressed: {
     opacity: 0.6,
