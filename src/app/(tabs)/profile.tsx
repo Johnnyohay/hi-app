@@ -15,8 +15,9 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
+import { CategorySelect } from '@/components/category-select';
 import { CityTypeahead } from '@/components/city-typeahead';
-import { askCategories, feedbackTags } from '@/constants/mock-network';
+import { askCategories, feedbackTags, type AskCategoryId } from '@/constants/mock-network';
 import { socialPlatforms, socialUrl, type SocialPlatform } from '@/constants/me';
 import { colorTokens } from '@/constants/tokens';
 import { useAuth } from '@/lib/auth-context';
@@ -235,6 +236,8 @@ export default function ProfileScreen() {
           city: me.city,
           bio: me.bio,
           skills: me.skills,
+          offer_category: me.offer_category,
+          offer_text: me.offer_text,
           current_ask: me.current_ask,
           social_links: me.social_links,
           lat: me.lat,
@@ -479,6 +482,39 @@ export default function ProfileScreen() {
                     Add
                   </Text>
                 </Pressable>
+              </View>
+            )}
+          </View>
+
+          <View className="gap-xs mt-2xl">
+            <SectionLabel>What I offer</SectionLabel>
+            {editing ? (
+              <View className="gap-sm mt-xs" style={{ position: 'relative' }}>
+                <CategorySelect
+                  value={me.offer_category as AskCategoryId | null}
+                  onChange={(offer_category) => setMe((current) => current && { ...current, offer_category })}
+                  placeholder="What category of help do you offer?"
+                />
+                <TextInput
+                  className="text-body font-sans text-ink dark:text-ink-dark"
+                  style={{ minHeight: 48, outlineWidth: 0 }}
+                  value={me.offer_text}
+                  onChangeText={(offer_text) => setMe((current) => current && { ...current, offer_text })}
+                  placeholder="What can you help people with?"
+                  placeholderTextColor={placeholderColor}
+                  multiline
+                />
+              </View>
+            ) : (
+              <View className="border-l-2 border-accent dark:border-accent-dark pl-lg mt-xs gap-xs">
+                {me.offer_category && (
+                  <Text className="text-caption font-mono text-ink-muted dark:text-ink-muted-dark uppercase">
+                    {askCategories.find((entry) => entry.id === me.offer_category)?.label}
+                  </Text>
+                )}
+                <Text className="text-body font-sans text-ink dark:text-ink-dark">
+                  {me.offer_text || 'Add what you can help people with.'}
+                </Text>
               </View>
             )}
           </View>

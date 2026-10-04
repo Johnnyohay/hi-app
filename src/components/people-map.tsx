@@ -1,9 +1,22 @@
 import { Pressable, Text, View, useColorScheme } from 'react-native';
+import Svg, { Line, Path } from 'react-native-svg';
 
 import { Avatar } from '@/components/avatar';
+import { WORLD_MAP_PATHS, WORLD_MAP_VIEW_BOX } from '@/constants/world-map-paths';
 import type { Profile } from '@/lib/api';
 import { colorTokens } from '@/constants/tokens';
 import { flagPrefix } from '@/lib/country-flag';
+
+// WORLD_MAP_VIEW_BOX is "0 0 494.7 265.7" — read its own width/height out so
+// the graticule can be drawn in the exact same coordinate space as the
+// landmass path, in one <Svg>, rather than two stacked ones (two full-size
+// siblings in a column-flex View split the available height between them
+// instead of overlapping — this keeps it to a single element instead).
+const [, , WORLD_MAP_WIDTH, WORLD_MAP_HEIGHT] = WORLD_MAP_VIEW_BOX.split(' ').map(Number);
+
+/** Longitude/latitude graticule, every 30°, drawn in the map's own coordinate space. */
+const GRATICULE_LONGITUDES = Array.from({ length: 13 }, (_, i) => (i / 12) * WORLD_MAP_WIDTH); // every 30°, -180..180
+const GRATICULE_LATITUDES = Array.from({ length: 7 }, (_, i) => (i / 6) * WORLD_MAP_HEIGHT); // every 30°, 90..-90
 
 export function project(lat: number, lng: number) {
   return {
@@ -72,8 +85,35 @@ export function MapCanvas({
       className="w-full rounded-sm border border-hairline dark:border-hairline-dark bg-surface dark:bg-surface-dark overflow-hidden"
       style={{ aspectRatio: 2 }}>
       <View pointerEvents="none" className="absolute inset-0">
-        <View className="absolute left-0 right-0 h-px bg-hairline dark:bg-hairline-dark" style={{ top: '50%' }} />
-        <View className="absolute top-0 bottom-0 w-px bg-hairline dark:bg-hairline-dark" style={{ left: '50%' }} />
+        <Svg width="100%" height="100%" viewBox={WORLD_MAP_VIEW_BOX} preserveAspectRatio="none">
+          {WORLD_MAP_PATHS.map((d, index) => (
+            <Path key={index} d={d} fill={colors.hairline} />
+          ))}
+          {GRATICULE_LONGITUDES.map((x) => (
+            <Line
+              key={`lon-${x}`}
+              x1={x}
+              y1={0}
+              x2={x}
+              y2={WORLD_MAP_HEIGHT}
+              stroke={colors.ink}
+              strokeOpacity={0.15}
+              strokeWidth={0.6}
+            />
+          ))}
+          {GRATICULE_LATITUDES.map((y) => (
+            <Line
+              key={`lat-${y}`}
+              x1={0}
+              y1={y}
+              x2={WORLD_MAP_WIDTH}
+              y2={y}
+              stroke={colors.ink}
+              strokeOpacity={0.15}
+              strokeWidth={0.6}
+            />
+          ))}
+        </Svg>
       </View>
 
       {me?.lat != null && me.lng != null && (
