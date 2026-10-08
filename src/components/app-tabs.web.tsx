@@ -1,10 +1,11 @@
 import { router, usePathname } from 'expo-router';
 import { Tabs, TabList, TabTrigger, TabSlot, TabTriggerSlotProps, TabListProps } from 'expo-router/ui';
-import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
+import { Pressable, ScrollView, useColorScheme, View, StyleSheet } from 'react-native';
 
 import { ThemedText } from './themed-text';
 
 import { Colors, ContentMaxWidth, Spacing } from '@/constants/theme';
+import { useIsWideScreen } from '@/hooks/use-breakpoint';
 
 export default function AppTabs() {
   return (
@@ -76,6 +77,12 @@ function AboutLink() {
 export function CustomTabList(props: TabListProps) {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
+  // The tab row doesn't fit alongside the full brand group at phone width —
+  // previously it just silently overflowed off-screen, making the tabs past
+  // "Messages" untappable (and anything behind that overflow able to
+  // intercept taps meant for them). Drop the tagline and let the row scroll
+  // horizontally so every tab stays reachable instead.
+  const isWide = useIsWideScreen();
 
   return (
     <View
@@ -87,12 +94,20 @@ export function CustomTabList(props: TabListProps) {
       <View style={styles.innerContainer}>
         <View style={styles.brandGroup}>
           <ThemedText type="title">Hi</ThemedText>
-          <ThemedText type="label" themeColor="inkMuted">
-            True connections, fast and easy
-          </ThemedText>
+          {isWide && (
+            <ThemedText type="label" themeColor="inkMuted">
+              True connections, fast and easy
+            </ThemedText>
+          )}
         </View>
 
-        <View style={styles.tabsRow}>{props.children}</View>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.tabsRow}
+          style={styles.tabsScroll}>
+          {props.children}
+        </ScrollView>
       </View>
     </View>
   );
@@ -112,13 +127,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  tabsScroll: {
+    flex: 1,
+  },
   tabsRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.xl,
-    marginLeft: 'auto',
+    flexGrow: 1,
+    justifyContent: 'flex-end',
   },
   brandGroup: {
-    marginRight: 'auto',
     flexDirection: 'row',
     alignItems: 'baseline',
     gap: Spacing.sm,
